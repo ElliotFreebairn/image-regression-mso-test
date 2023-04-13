@@ -35,6 +35,74 @@ namespace mso_test
             powerPointApp.Quit();
         }
 
+        public static async Task testDownloadedfiles()
+        {
+            DirectoryInfo downloadedDirInfo = new DirectoryInfo(@"download");
+            FileInfo[] downloadedFileInfo = downloadedDirInfo.GetFiles();
+            foreach (FileInfo file in downloadedFileInfo)
+            {
+                bool result = false;
+                string convertTo = null;
+                if (docExtention.Contains(file.Extension))
+                {
+                    if (wordExtention.Contains(file.Extension))
+                        result = TestWordDoc(file.FullName).Item1;
+                    else
+                        result = true;
+                    convertTo = "docx";
+                }
+                else if (sheetExtention.Contains(file.Extension))
+                {
+                    if (excelExtention.Contains(file.Extension))
+                        result = TestExcelWorkbook(file.FullName).Item1;
+                    else
+                        result = true;
+                    convertTo = "xlsx";
+                }
+                else if (presentationExtention.Contains(file.Extension))
+                {
+                    if (powerPointExtention.Contains(file.Extension))
+                        result = TestPowerPointPresentation(file.FullName).Item1;
+                    else
+                        result = true;
+
+                    convertTo = "pptx";
+                }
+
+                if (result && !string.IsNullOrEmpty(convertTo))
+                {
+                    await convertFile(file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo);
+                }
+            }
+        }
+
+        public static async Task convertFile(string fullFileName, string fileName, string convertTo)
+        {
+            using (var request = new HttpRequestMessage(new HttpMethod("POST"), coolClient.BaseAddress + "/" + convertTo))
+            {
+                var multipartContent = new MultipartFormDataContent
+                {
+                    { new ByteArrayContent(File.ReadAllBytes(fullFileName)), "data", Path.GetFileName(fullFileName) }
+                };
+                request.Content = multipartContent;
+
+                using (var response = await coolClient.SendAsync(request))
+                {
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.Error.WriteLine("Faild to convert " + fullFileName);
+                        return;
+                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(@"converted\"));
+
+                    using (FileStream fs = File.Open(@"converted\" + fileName + "." + convertTo, FileMode.Create))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                    }
+                }
+            }
+        }
+
         private static (bool, string) TestWordDoc(string fileName)
         {
             word.Document doc = null;
