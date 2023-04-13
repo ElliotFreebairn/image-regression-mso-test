@@ -8,6 +8,8 @@ using excel = Microsoft.Office.Interop.Excel;
 using powerPoint = Microsoft.Office.Interop.PowerPoint;
 using System.Runtime.InteropServices;
 using System.Net.Http;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace mso_test
 {
@@ -16,6 +18,7 @@ namespace mso_test
         public static word.Application wordApp = new word.Application();
         public static excel.Application excelApp = new excel.Application();
         public static powerPoint.Application powerPointApp = new powerPoint.Application();
+        public const string bugListFileName = "bugList.csv";
 
         public static HttpClient client = new HttpClient();
 
@@ -97,10 +100,10 @@ namespace mso_test
             return (testResult, errorMessage);
         }
 
-        private static async void downloadBugList()
+        public static async Task downloadBugList()
         {
             // search all the bugs which has MSO or libreoffice file attachments
-            string buglistParameters = "/buglist.cgi" +
+            string bugListParameters = "/buglist.cgi" +
                 "?f1=attachments.mimetype&f10=attachments.mimetype&f11=attachments.mimetype&f2=attachments.mimetype" +
                 "&f3=attachments.mimetype&f4=attachments.mimetype&f5=attachments.mimetype&f6=attachments.mimetype" +
                 "&f7=attachments.mimetype&f8=attachments.mimetype&f9=attachments.mimetype" +
@@ -111,12 +114,61 @@ namespace mso_test
                 "&v6=application%2Fvnd.oasis.opendocument.spreadsheet&v7=application%2Fvnd.openxmlformats-officedocument.wordprocessingml.document" +
                 "&v8=application%2Fvnd.ms-excel&v9=application%2Fvnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-            using (var respose = client.GetAsync(buglistParameters).Result.Content)
+            using (var response = await bugsClient.GetAsync(bugListParameters))
             {
-                using (var fileStream = new FileStream("buglist.csv", FileMode.Create))
+                using (var fileStream = new FileStream(bugListFileName, FileMode.Create))
                 {
-                    await respose.CopyToAsync(fileStream);
+                    await response.Content.CopyToAsync(fileStream);
                 }
+            }
+        }
+
+        public static List<string> createBugList()
+        {
+            List<string> bugList = new List<string>();
+            using (var reader = new StreamReader(bugListFileName))
+            {
+                reader.ReadLine();
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    var values = line.Split(',');
+
+                    bugList.Add(values[0]);
+        }
+            }
+            return bugList;
+            }
+
+        public static async Task downloadAttachmentsOfBug(string bugId)
+        {
+            string attachmentQuery = "/rest/bug/" + bugId + "/attachment";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(@"download\"));
+
+            using (var response = await bugsClient.GetAsync(attachmentQuery))
+            {
+                if (!response.IsSuccessStatusCode)
+            {
+                    Console.Error.WriteLine("Faild to download attachement of bug " + bugId);
+                    return;
+                }
+                JObject jsonResponse = JObject.Parse(await response.Content.ReadAsStringAsync());
+                JArray attachmentList = (JArray)jsonResponse["bugs"][bugId];
+                foreach (var attachment in attachmentList)
+                {
+                    if (allowedMimeTypes.Contains(attachment["content_type"].ToString()))
+                        File.WriteAllBytes(@"download\" + attachment["file_name"].ToString(), Convert.FromBase64String(attachment["data"].ToString()));
+                }
+            }
+                }
+
+        public static async Task downloadNBugsAttachment(List<string> bugIds, int numberOfBugs)
+        {
+            int _numberOfBugs = numberOfBugs == 0 ? bugIds.Count() : numberOfBugs;
+            for (int i = 0; i < _numberOfBugs && i < bugIds.Count(); i++)
+            {
+                await downloadAttachmentsOfBug(bugIds[i]);
             }
         }
     }
