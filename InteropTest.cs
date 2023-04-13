@@ -125,6 +125,41 @@ namespace mso_test
             }
         }
 
+        public static void testConvertedFile()
+        {
+            DirectoryInfo convertedDirInfo = new DirectoryInfo(@"converted");
+            FileInfo[] convertedFileInfo = convertedDirInfo.GetFiles();
+
+            using (FileStream fs = new FileStream("failedFiles.txt", FileMode.Create))
+            {
+                foreach (FileInfo file in convertedFileInfo)
+                {
+                    (bool, string) result = (true, "");
+                    if (docExtention.Contains(file.Extension))
+                    {
+                        if (wordExtention.Contains(file.Extension))
+                            result = TestWordDoc(file.FullName);
+                    }
+                    else if (sheetExtention.Contains(file.Extension))
+                    {
+                        if (excelExtention.Contains(file.Extension))
+                            result = TestExcelWorkbook(file.FullName);
+                    }
+                    else if (presentationExtention.Contains(file.Extension))
+                    {
+                        if (powerPointExtention.Contains(file.Extension))
+                            result = TestPowerPointPresentation(file.FullName);
+                    }
+
+                    if (!result.Item1)
+                    {
+                        byte[] info = new UTF8Encoding(true).GetBytes(file.FullName + ": " + result.Item2 + "\n");
+                        fs.Write(info, 0, info.Length);
+                    }
+                }
+            }
+        }
+
         public static async Task convertFile(string fullFileName, string fileName, string convertTo)
         {
             using (var request = new HttpRequestMessage(new HttpMethod("POST"), coolClient.BaseAddress + "/" + convertTo))
