@@ -203,7 +203,7 @@ namespace mso_test
                 errorMessage = e.Message;
             }
             if (doc != null)
-                doc.Close();
+                doc.Close(SaveChanges: false);
 
             return (testResult, errorMessage);
         }
@@ -225,7 +225,7 @@ namespace mso_test
             }
 
             if (wb != null)
-                wb.Close();
+                wb.Close(SaveChanges: false);
 
             return (testResult, errorMessage);
         }
