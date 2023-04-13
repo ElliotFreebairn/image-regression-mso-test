@@ -19,13 +19,62 @@ namespace mso_test
         public static excel.Application excelApp = new excel.Application();
         public static powerPoint.Application powerPointApp = new powerPoint.Application();
         public const string bugListFileName = "bugList.csv";
+        public static HttpClient bugsClient = new HttpClient() { BaseAddress = new Uri("https://bugs.documentfoundation.org") };
+        public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://share.collaboraonline.com/cool/convert-to") };
 
-        public static HttpClient client = new HttpClient();
-
-        static InteropTest()
+        public static HashSet<string> allowedMimeTypes = new HashSet<string>()
         {
-            client.BaseAddress = new Uri("https://bugs.documentfoundation.org");
-        }
+            "application/excel",
+            "application/msword",
+            "application/powerpoint",
+            "application/vnd.ms-excel",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.oasis.opendocument.presentation",
+            "application/vnd.oasis.opendocument.spreadsheet",
+            "application/vnd.oasis.opendocument.text",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        };
+
+        public static HashSet<string> docExtention = new HashSet<string>()
+        {
+            ".odt",
+            ".docx",
+            ".doc"
+        };
+
+        public static HashSet<string> wordExtention = new HashSet<string>()
+        {
+            ".docx",
+            ".doc"
+        };
+
+        public static HashSet<string> sheetExtention = new HashSet<string>()
+        {
+            ".ods",
+            ".xls",
+            ".xlsx"
+        };
+
+        public static HashSet<string> excelExtention = new HashSet<string>()
+        {
+            ".xls",
+            ".xlsx"
+        };
+
+        public static HashSet<string> presentationExtention = new HashSet<string>()
+        {
+            ".odp",
+            ".ppt",
+            ".pptx"
+        };
+
+        public static HashSet<string> powerPointExtention = new HashSet<string>()
+        {
+            ".ppt",
+            ".pptx"
+        };
 
         private static void Main(string[] args)
         {
