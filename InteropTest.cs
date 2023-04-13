@@ -76,9 +76,14 @@ namespace mso_test
             ".pptx"
         };
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World");
+            await downloadBugList();
+            var bugList = createBugList();
+            await downloadNBugsAttachment(bugList, 100);
+            await testDownloadedfiles();
+            testConvertedFile();
+
             wordApp.Quit();
             excelApp.Quit();
             powerPointApp.Quit();
@@ -287,10 +292,10 @@ namespace mso_test
                     var values = line.Split(',');
 
                     bugList.Add(values[0]);
-        }
+                }
             }
             return bugList;
-            }
+        }
 
         public static async Task downloadAttachmentsOfBug(string bugId)
         {
@@ -301,7 +306,7 @@ namespace mso_test
             using (var response = await bugsClient.GetAsync(attachmentQuery))
             {
                 if (!response.IsSuccessStatusCode)
-            {
+                {
                     Console.Error.WriteLine("Faild to download attachement of bug " + bugId);
                     return;
                 }
@@ -313,7 +318,7 @@ namespace mso_test
                         File.WriteAllBytes(@"download\" + attachment["file_name"].ToString(), Convert.FromBase64String(attachment["data"].ToString()));
                 }
             }
-                }
+        }
 
         public static async Task downloadNBugsAttachment(List<string> bugIds, int numberOfBugs)
         {
