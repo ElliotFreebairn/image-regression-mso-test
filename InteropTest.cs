@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Net.Http;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace mso_test
 {
@@ -20,7 +21,7 @@ namespace mso_test
         public static powerPoint.Application powerPointApp = new powerPoint.Application();
         public const string bugListFileName = "bugList.csv";
         public static HttpClient bugsClient = new HttpClient() { BaseAddress = new Uri("https://bugs.documentfoundation.org") };
-        public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://share.collaboraonline.com/cool/convert-to") };
+        public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://staging.eu.collaboraonline.com/cool/convert-to") };
 
         public static HashSet<string> allowedMimeTypes = new HashSet<string>()
         {
@@ -78,6 +79,7 @@ namespace mso_test
 
         private static async Task Main(string[] args)
         {
+            ServicePointManager.Expect100Continue = false;
             await downloadBugList();
             var bugList = createBugList();
             await downloadNBugsAttachment(bugList, 100);
@@ -179,7 +181,7 @@ namespace mso_test
                 {
                     if (!response.IsSuccessStatusCode)
                     {
-                        Console.Error.WriteLine("Faild to convert " + fullFileName);
+                        Console.Error.WriteLine("Faild to convert " + fullFileName + ": " + response.StatusCode);
                         return;
                     }
                     Directory.CreateDirectory(Path.GetDirectoryName(@"converted\"));
