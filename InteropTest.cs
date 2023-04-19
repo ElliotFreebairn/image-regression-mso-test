@@ -82,7 +82,7 @@ namespace mso_test
             ServicePointManager.Expect100Continue = false;
             await downloadBugList();
             var bugList = createBugList();
-            await downloadNBugsAttachment(bugList, 100);
+            await downloadNBugsAttachment(bugList, 1000);
             await testDownloadedfiles();
             testConvertedFile();
 
@@ -212,6 +212,9 @@ namespace mso_test
             if (doc != null)
                 doc.Close(SaveChanges: false);
 
+            if (!testResult)
+                System.IO.File.Move(fileName, fileName + ".failed");
+
             return (testResult, errorMessage);
         }
 
@@ -234,6 +237,9 @@ namespace mso_test
             if (wb != null)
                 wb.Close(SaveChanges: false);
 
+            if (!testResult)
+                System.IO.File.Move(fileName, fileName + ".failed");
+
             return (testResult, errorMessage);
         }
 
@@ -255,6 +261,9 @@ namespace mso_test
 
             if (presentation != null)
                 presentation.Close();
+
+            if (!testResult)
+                System.IO.File.Move(fileName, fileName + ".failed");
 
             return (testResult, errorMessage);
         }
