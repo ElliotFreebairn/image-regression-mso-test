@@ -16,9 +16,34 @@ namespace mso_test
 {
     internal class InteropTest
     {
-        public static word.Application wordApp = new word.Application();
-        public static excel.Application excelApp = new excel.Application();
-        public static powerPoint.Application powerPointApp = new powerPoint.Application();
+        public static word.Application wordApp;
+        public static excel.Application excelApp;
+        public static powerPoint.Application powerPointApp;
+
+        public static void startApplication(string application)
+        {
+            if (application == "word")
+                wordApp = new word.Application();
+
+            if (application == "excel")
+                excelApp = new excel.Application();
+
+            if (application == "powerpoint")
+                powerPointApp = new powerPoint.Application();
+        }
+
+        public static void quitApplication(string application)
+        {
+            if (application == "word")
+                wordApp.Quit();
+
+            if (application == "excel")
+                excelApp.Quit();
+
+            if (application == "powerpoint")
+                powerPointApp.Quit();
+        }
+
         public const string bugListFileName = "bugList.csv";
         public static HttpClient bugsClient = new HttpClient() { BaseAddress = new Uri("https://bugs.documentfoundation.org") };
         public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://staging.eu.collaboraonline.com/cool/convert-to") };
@@ -77,21 +102,28 @@ namespace mso_test
             ".pptx"
         };
 
+        //args can be word/excel/powerpoint
+        //specified appropriate docs will be tested with the specified program
         private static async Task Main(string[] args)
         {
             ServicePointManager.Expect100Continue = false;
-            await downloadBugList();
-            var bugList = createBugList();
-            await downloadNBugsAttachment(bugList, 1000);
-            await testDownloadedfiles();
-            testConvertedFile();
+            if (args[0] == "download")
+            {
+                await downloadBugList();
+                var bugList = createBugList();
+                await downloadNBugsAttachment(bugList, int.Parse(args[1]));
 
-            wordApp.Quit();
-            excelApp.Quit();
-            powerPointApp.Quit();
+                return;
+            }
+
+            startApplication(args[0]);
+            await testDownloadedfiles(args[0]);
+            testConvertedFile(args[0]);
+
+            quitApplication(args[0]);
         }
 
-        public static async Task testDownloadedfiles()
+        public static async Task testDownloadedfiles(string application)
         {
             DirectoryInfo downloadedDirInfo = new DirectoryInfo(@"download");
             FileInfo[] downloadedFileInfo = downloadedDirInfo.GetFiles();
@@ -99,7 +131,7 @@ namespace mso_test
             {
                 bool result = false;
                 string convertTo = null;
-                if (docExtention.Contains(file.Extension))
+                if (application == "word" && docExtention.Contains(file.Extension))
                 {
                     if (wordExtention.Contains(file.Extension))
                         result = TestWordDoc(file.FullName).Item1;
@@ -107,7 +139,7 @@ namespace mso_test
                         result = true;
                     convertTo = "docx";
                 }
-                else if (sheetExtention.Contains(file.Extension))
+                else if (application == "excel" && sheetExtention.Contains(file.Extension))
                 {
                     if (excelExtention.Contains(file.Extension))
                         result = TestExcelWorkbook(file.FullName).Item1;
@@ -115,7 +147,7 @@ namespace mso_test
                         result = true;
                     convertTo = "xlsx";
                 }
-                else if (presentationExtention.Contains(file.Extension))
+                else if (application == "powerpoint" && presentationExtention.Contains(file.Extension))
                 {
                     if (powerPointExtention.Contains(file.Extension))
                         result = TestPowerPointPresentation(file.FullName).Item1;
@@ -132,27 +164,27 @@ namespace mso_test
             }
         }
 
-        public static void testConvertedFile()
+        public static void testConvertedFile(string application)
         {
             DirectoryInfo convertedDirInfo = new DirectoryInfo(@"converted");
             FileInfo[] convertedFileInfo = convertedDirInfo.GetFiles();
 
-            using (FileStream fs = new FileStream("failedFiles.txt", FileMode.Create))
+            using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Create))
             {
                 foreach (FileInfo file in convertedFileInfo)
                 {
                     (bool, string) result = (true, "");
-                    if (docExtention.Contains(file.Extension))
+                    if (application == "word" && docExtention.Contains(file.Extension))
                     {
                         if (wordExtention.Contains(file.Extension))
                             result = TestWordDoc(file.FullName);
                     }
-                    else if (sheetExtention.Contains(file.Extension))
+                    else if (application == "excel" && sheetExtention.Contains(file.Extension))
                     {
                         if (excelExtention.Contains(file.Extension))
                             result = TestExcelWorkbook(file.FullName);
                     }
-                    else if (presentationExtention.Contains(file.Extension))
+                    else if (application == "powerpoint" && presentationExtention.Contains(file.Extension))
                     {
                         if (powerPointExtention.Contains(file.Extension))
                             result = TestPowerPointPresentation(file.FullName);
@@ -177,20 +209,24 @@ namespace mso_test
                 };
                 request.Content = multipartContent;
 
-                using (var response = await coolClient.SendAsync(request))
+                try
                 {
-                    if (!response.IsSuccessStatusCode)
+                    using (var response = await coolClient.SendAsync(request))
                     {
-                        Console.Error.WriteLine("Faild to convert " + fullFileName + ": " + response.StatusCode);
-                        return;
-                    }
-                    Directory.CreateDirectory(Path.GetDirectoryName(@"converted\"));
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            Console.Error.WriteLine("Faild to convert " + fullFileName + ": " + response.StatusCode);
+                            return;
+                        }
+                        Directory.CreateDirectory(Path.GetDirectoryName(@"converted\"));
 
-                    using (FileStream fs = File.Open(@"converted\" + fileName + "." + convertTo, FileMode.Create))
-                    {
-                        await response.Content.CopyToAsync(fs);
+                        using (FileStream fs = File.Open(@"converted\" + fileName + "." + convertTo, FileMode.Create))
+                        {
+                            await response.Content.CopyToAsync(fs);
+                        }
                     }
                 }
+                catch (Exception ex) { Console.WriteLine(ex); }
             }
         }
 
