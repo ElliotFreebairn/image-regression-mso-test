@@ -237,7 +237,7 @@ namespace mso_test
 
             try
             {
-                doc = wordApp.Documents.OpenNoRepairDialog(fileName, ReadOnly: true, Visible: false);
+                doc = wordApp.Documents.OpenNoRepairDialog(fileName, ReadOnly: true, Visible: false, PasswordDocument: "'");
             }
             catch (COMException e)
             {
@@ -261,7 +261,7 @@ namespace mso_test
 
             try
             {
-                wb = excelApp.Workbooks.Open(fileName, ReadOnly: true);
+                wb = excelApp.Workbooks.Open(fileName, ReadOnly: true, Password: "'");
             }
             catch (COMException e)
             {
