@@ -107,15 +107,6 @@ namespace mso_test
         private static async Task Main(string[] args)
         {
             ServicePointManager.Expect100Continue = false;
-            if (args[0] == "download")
-            {
-                await downloadBugList();
-                var bugList = createBugList();
-                await downloadNBugsAttachment(bugList, int.Parse(args[1]));
-
-                return;
-            }
-
             startApplication(args[0]);
             await testDownloadedfiles(args[0]);
             testConvertedFile(args[0]);

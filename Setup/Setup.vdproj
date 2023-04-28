@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_2B54FB71ECE04CE688E1ADFA140F9B44"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_32560D444B822D384F8377A6D9D93718"
         "OwnerKey" = "8:_6C8D3D9C9BBC411686B95A60FC8DF216"
         "MsmSig" = "8:_UNDEFINED"
@@ -28,12 +34,6 @@
         "Entry"
         {
         "MsmKey" = "8:_6C8D3D9C9BBC411686B95A60FC8DF216"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_CBCF53F467F94E748F5D1F5045F55C3E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -144,6 +144,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B54FB71ECE04CE688E1ADFA140F9B44"
+            {
+            "SourcePath" = "8:..\\downloadTestData.sh"
+            "TargetName" = "8:downloadTestData.sh"
+            "Tag" = "8:"
+            "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_32560D444B822D384F8377A6D9D93718"
             {
             "AssemblyRegister" = "3:1"
@@ -151,6 +171,11 @@
             "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_32560D444B822D384F8377A6D9D93718"
+                    {
+                    "Name" = "8:Newtonsoft.Json.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:Newtonsoft.Json.dll"
             "TargetName" = "8:"
@@ -197,29 +222,14 @@
             "AssemblyAsmDisplayName" = "8:mso-test, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_6C8D3D9C9BBC411686B95A60FC8DF216"
+                    {
+                    "Name" = "8:mso-test.exe"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:..\\bin\\Release\\mso-test.exe"
             "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CBCF53F467F94E748F5D1F5045F55C3E"
-            {
-            "SourcePath" = "8:..\\downloadBugzillaFiles.bat"
-            "TargetName" = "8:downloadBugzillaFiles.bat"
             "Tag" = "8:"
             "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
             "Condition" = "8:"

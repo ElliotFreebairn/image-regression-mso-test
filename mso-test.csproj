@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="downloadBugzillaFiles.bat" />
+    <None Include="downloadTestData.sh" />
     <None Include="packages.config" />
     <None Include="runMSOTest.bat" />
   </ItemGroup>
@@ -136,6 +136,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(ProjectDir)runMSOTest.bat" "$(TargetDir)runMSOTest.bat"
-copy /Y "$(ProjectDir)downloadBugzillaFiles.bat" "$(TargetDir)downloadBugzillaFiles.bat"</PostBuildEvent>
+copy /Y "$(ProjectDir)runMSOTest.bat" "$(TargetDir)downloadTestData.sh"</PostBuildEvent>
   </PropertyGroup>
 </Project>
