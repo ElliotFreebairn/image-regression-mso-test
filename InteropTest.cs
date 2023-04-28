@@ -117,6 +117,10 @@ namespace mso_test
         public static async Task testDownloadedfiles(string application)
         {
             DirectoryInfo downloadedDirInfo = new DirectoryInfo(@"download");
+            if (!downloadedDirInfo.Exists)
+            {
+                return;
+            }
             FileInfo[] downloadedFileInfo = downloadedDirInfo.GetFiles();
             foreach (FileInfo file in downloadedFileInfo)
             {
@@ -158,6 +162,10 @@ namespace mso_test
         public static void testConvertedFile(string application)
         {
             DirectoryInfo convertedDirInfo = new DirectoryInfo(@"converted");
+            if (!convertedDirInfo.Exists)
+            {
+                return;
+            }
             FileInfo[] convertedFileInfo = convertedDirInfo.GetFiles();
 
             using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Create))
