@@ -136,6 +136,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(ProjectDir)runMSOTest.bat" "$(TargetDir)runMSOTest.bat"
-copy /Y "$(ProjectDir)runMSOTest.bat" "$(TargetDir)downloadTestData.sh"</PostBuildEvent>
+copy /Y "$(ProjectDir)downloadTestData.sh" "$(TargetDir)downloadTestData.sh"</PostBuildEvent>
   </PropertyGroup>
 </Project>
