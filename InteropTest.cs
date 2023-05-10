@@ -41,7 +41,7 @@ namespace mso_test
                 powerPointApp = new powerPoint.Application();
                 powerPointApp.DisplayAlerts = powerPoint.PpAlertLevel.ppAlertsNone;
                 powerPointApp.AutomationSecurity = Microsoft.Office.Core.MsoAutomationSecurity.msoAutomationSecurityForceDisable;
-        }
+            }
         }
 
         public static void quitApplication(string application)
@@ -121,9 +121,66 @@ namespace mso_test
             ServicePointManager.Expect100Continue = false;
             startApplication(args[0]);
             await testDownloadedfiles(args[0]);
-            testConvertedFile(args[0]);
 
             quitApplication(args[0]);
+        }
+
+        public static (bool, string) testFile(string application, string fileName)
+        {
+            if (File.Exists(fileName + ".failed"))
+                return (false, "");
+
+            if (application == "word")
+            {
+                return TestWordDoc(fileName);
+            }
+            else if (application == "excel")
+            {
+                return TestExcelWorkbook(fileName);
+            }
+            else if (application == "powerpoint")
+            {
+                return TestPowerPointPresentation(fileName);
+            }
+
+            return (false, "");
+        }
+
+        public static async Task testDirectoriy(string application, DirectoryInfo dir, string convertTo)
+        {
+            FileInfo[] fileInfos = dir.GetFiles();
+            var watch = new System.Diagnostics.Stopwatch();
+            foreach (FileInfo file in fileInfos)
+            {
+                if (file.Extension == ".failed" ||
+                    File.Exists(Path.GetFullPath(@"converted\" + convertTo + @"\" + Path.GetFileNameWithoutExtension(file.Name) + "." + convertTo)) ||
+                    File.Exists(Path.GetFullPath(@"converted\" + convertTo + @"\" + Path.GetFileNameWithoutExtension(file.Name) + "." + convertTo + ".failed")))
+                    continue;
+
+                Console.WriteLine("Starting test for " + file.Name);
+                watch.Restart();
+                bool DownloadResult = testFile(application, file.FullName).Item1;
+
+                if (DownloadResult)
+                {
+                    await convertFile(file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo).ContinueWith(task =>
+                    {
+                        if (string.IsNullOrEmpty(task.Result))
+                            return;
+                        (bool, string) ConvertResult = testFile(application, task.Result);
+                        if (!ConvertResult.Item1)
+                        {
+                            using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Append))
+                            {
+                                byte[] info = new UTF8Encoding(true).GetBytes(file.FullName + ": " + ConvertResult.Item2 + "\n");
+                                fs.Write(info, 0, info.Length);
+                            }
+                        }
+                    });
+                }
+                watch.Stop();
+                Console.WriteLine(file.Name + $" testing took {watch.ElapsedMilliseconds} ms\n");
+            }
         }
 
         public static async Task testDownloadedfiles(string application)
@@ -133,54 +190,41 @@ namespace mso_test
             {
                 return;
             }
-            FileInfo[] downloadedFileInfo = downloadedDirInfo.GetFiles();
-            foreach (FileInfo file in downloadedFileInfo)
+            DirectoryInfo[] downloadedDictInfo = downloadedDirInfo.GetDirectories();
+            foreach (DirectoryInfo dict in downloadedDictInfo)
             {
-                bool result = false;
-                string convertTo = null;
-                if (application == "word" && docExtention.Contains(file.Extension))
+                if (application == "word" && (dict.Name == "doc" || dict.Name == "docx" || dict.Name == "odt"))
                 {
-                    if (wordExtention.Contains(file.Extension))
-                        result = TestWordDoc(file.FullName).Item1;
-                    else
-                        result = true;
-                    convertTo = "docx";
+                    await testDirectoriy(application, dict, "docx");
                 }
-                else if (application == "excel" && sheetExtention.Contains(file.Extension))
+                else if (application == "excel" && (dict.Name == "xls" || dict.Name == "xlsx" || dict.Name == "ods"))
                 {
-                    if (excelExtention.Contains(file.Extension))
-                        result = TestExcelWorkbook(file.FullName).Item1;
-                    else
-                        result = true;
-                    convertTo = "xlsx";
+                    await testDirectoriy(application, dict, "xlsx");
                 }
-                else if (application == "powerpoint" && presentationExtention.Contains(file.Extension))
+                else if (application == "powerpoint" && (dict.Name == "ppt" || dict.Name == "pptx" || dict.Name == "odp"))
                 {
-                    if (powerPointExtention.Contains(file.Extension))
-                        result = TestPowerPointPresentation(file.FullName).Item1;
-                    else
-                        result = true;
-
-                    convertTo = "pptx";
-                }
-
-                if (result && !string.IsNullOrEmpty(convertTo))
-                {
-                    await convertFile(file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo);
+                    await testDirectoriy(application, dict, "pptx");
                 }
             }
         }
 
         public static void testConvertedFile(string application)
         {
-            DirectoryInfo convertedDirInfo = new DirectoryInfo(@"converted");
+            string directoryName = "";
+            if (application == "word")
+                directoryName = "docx";
+            else if (application == "excel")
+                directoryName = "xlsx";
+            else if (application == "powerpoint")
+                directoryName = "pptx";
+            DirectoryInfo convertedDirInfo = new DirectoryInfo(@"converted\" + directoryName);
             if (!convertedDirInfo.Exists)
             {
                 return;
             }
             FileInfo[] convertedFileInfo = convertedDirInfo.GetFiles();
 
-            using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Create))
+            using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Append))
             {
                 foreach (FileInfo file in convertedFileInfo)
                 {
@@ -210,7 +254,7 @@ namespace mso_test
             }
         }
 
-        public static async Task convertFile(string fullFileName, string fileName, string convertTo)
+        public static async Task<string> convertFile(string fullFileName, string fileName, string convertTo)
         {
             using (var request = new HttpRequestMessage(new HttpMethod("POST"), coolClient.BaseAddress + "/" + convertTo))
             {
@@ -227,18 +271,20 @@ namespace mso_test
                         if (!response.IsSuccessStatusCode)
                         {
                             Console.Error.WriteLine("Faild to convert " + fullFileName + ": " + response.StatusCode);
-                            return;
+                            return "";
                         }
-                        Directory.CreateDirectory(Path.GetDirectoryName(@"converted\"));
+                        Directory.CreateDirectory(Path.GetDirectoryName(@"converted\" + convertTo + @"\"));
 
-                        using (FileStream fs = File.Open(@"converted\" + fileName + "." + convertTo, FileMode.Create))
+                        string convertedFilePath = @"converted\" + convertTo + @"\" + fileName + "." + convertTo;
+                        using (FileStream fs = File.Open(convertedFilePath, FileMode.Create))
                         {
-                            await response.Content.CopyToAsync(fs);
+                            return await response.Content.CopyToAsync(fs).ContinueWith(task => { return fs.Name; });
                         }
                     }
                 }
                 catch (Exception ex) { Console.WriteLine(ex); }
             }
+            return "";
         }
 
         private static (bool, string) TestWordDoc(string fileName)
@@ -260,7 +306,13 @@ namespace mso_test
                 doc.Close(SaveChanges: false);
 
             if (!testResult)
-                System.IO.File.Move(fileName, fileName + ".failed");
+            {
+                try
+                {
+                    System.IO.File.Move(fileName, fileName + ".failed");
+                }
+                catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
+            }
 
             return (testResult, errorMessage);
         }
@@ -273,7 +325,7 @@ namespace mso_test
 
             try
             {
-                wb = excelApp.Workbooks.Open(fileName, ReadOnly: true, Password: "'");
+                wb = excelApp.Workbooks.Open(fileName, ReadOnly: true, Password: "'", UpdateLinks: false);
             }
             catch (COMException e)
             {
@@ -285,7 +337,13 @@ namespace mso_test
                 wb.Close(SaveChanges: false);
 
             if (!testResult)
-                System.IO.File.Move(fileName, fileName + ".failed");
+            {
+                try
+                {
+                    System.IO.File.Move(fileName, fileName + ".failed");
+                }
+                catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
+            }
 
             return (testResult, errorMessage);
         }
@@ -310,7 +368,13 @@ namespace mso_test
                 presentation.Close();
 
             if (!testResult)
-                System.IO.File.Move(fileName, fileName + ".failed");
+            {
+                try
+                {
+                    System.IO.File.Move(fileName, fileName + ".failed");
+                }
+                catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
+            }
 
             return (testResult, errorMessage);
         }
