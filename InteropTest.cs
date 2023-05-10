@@ -56,41 +56,15 @@ namespace mso_test
 
         public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://staging.eu.collaboraonline.com/cool/convert-to") };
 
-        public static HashSet<string> docExtention = new HashSet<string>()
+        public static HashSet<string> allowedExtension = new HashSet<string>()
         {
             ".odt",
             ".docx",
-            ".doc"
-        };
-
-        public static HashSet<string> wordExtention = new HashSet<string>()
-        {
-            ".docx",
-            ".doc"
-        };
-
-        public static HashSet<string> sheetExtention = new HashSet<string>()
-        {
+            ".doc",
             ".ods",
             ".xls",
-            ".xlsx"
-        };
-
-        public static HashSet<string> excelExtention = new HashSet<string>()
-        {
-            ".xls",
-            ".xlsx"
-        };
-
-        public static HashSet<string> presentationExtention = new HashSet<string>()
-        {
+            ".xlsx",
             ".odp",
-            ".ppt",
-            ".pptx"
-        };
-
-        public static HashSet<string> powerPointExtention = new HashSet<string>()
-        {
             ".ppt",
             ".pptx"
         };
@@ -127,13 +101,24 @@ namespace mso_test
             return (false, "");
         }
 
+        public static void logInfo(string application, string failType, string msg)
+        {
+            string fileName = (failType == "conversion" ? "failed_conversion_" : "failed_files_") + application + ".txt";
+
+            using (FileStream fs = new FileStream(fileName, FileMode.Append))
+            {
+                byte[] info = new UTF8Encoding(true).GetBytes(msg + "\n");
+                fs.Write(info, 0, info.Length);
+            }
+        }
+
         public static async Task testDirectoriy(string application, DirectoryInfo dir, string convertTo)
         {
             FileInfo[] fileInfos = dir.GetFiles();
             var watch = new System.Diagnostics.Stopwatch();
             foreach (FileInfo file in fileInfos)
             {
-                if (file.Extension == ".failed" ||
+                if (!allowedExtension.Contains(file.Extension) ||
                     File.Exists(Path.GetFullPath(@"converted\" + convertTo + @"\" + Path.GetFileNameWithoutExtension(file.Name) + "." + convertTo)) ||
                     File.Exists(Path.GetFullPath(@"converted\" + convertTo + @"\" + Path.GetFileNameWithoutExtension(file.Name) + "." + convertTo + ".failed")))
                     continue;
@@ -144,18 +129,14 @@ namespace mso_test
 
                 if (DownloadResult)
                 {
-                    await convertFile(file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo).ContinueWith(task =>
+                    await convertFile(application, file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo).ContinueWith(task =>
                     {
                         if (string.IsNullOrEmpty(task.Result))
                             return;
                         (bool, string) ConvertResult = testFile(application, task.Result);
                         if (!ConvertResult.Item1)
                         {
-                            using (FileStream fs = new FileStream("failed_files_" + application + ".txt", FileMode.Append))
-                            {
-                                byte[] info = new UTF8Encoding(true).GetBytes(file.FullName + ": " + ConvertResult.Item2 + "\n");
-                                fs.Write(info, 0, info.Length);
-                            }
+                            logInfo(application, "fail", file.FullName + ": " + ConvertResult.Item2);
                         }
                     });
                 }
@@ -189,7 +170,7 @@ namespace mso_test
             }
         }
 
-        public static async Task<string> convertFile(string fullFileName, string fileName, string convertTo)
+        public static async Task<string> convertFile(string application, string fullFileName, string fileName, string convertTo)
         {
             using (var request = new HttpRequestMessage(new HttpMethod("POST"), coolClient.BaseAddress + "/" + convertTo))
             {
@@ -206,6 +187,18 @@ namespace mso_test
                         if (!response.IsSuccessStatusCode)
                         {
                             Console.Error.WriteLine("Faild to convert " + fullFileName + ": " + response.StatusCode);
+
+                            if (response.StatusCode == HttpStatusCode.BadGateway)
+                            {
+                                try
+                                {
+                                    System.IO.File.Move(fullFileName, fullFileName + ".convfail");
+                                }
+                                catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
+
+                                logInfo(application, "conversion", fullFileName + ": " + response.StatusCode);
+                            }
+
                             return "";
                         }
                         Directory.CreateDirectory(Path.GetDirectoryName(@"converted\" + convertTo + @"\"));
