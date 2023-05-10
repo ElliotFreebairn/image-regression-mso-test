@@ -23,13 +23,25 @@ namespace mso_test
         public static void startApplication(string application)
         {
             if (application == "word")
+            {
                 wordApp = new word.Application();
+                wordApp.DisplayAlerts = word.WdAlertLevel.wdAlertsNone;
+                wordApp.AutomationSecurity = Microsoft.Office.Core.MsoAutomationSecurity.msoAutomationSecurityForceDisable;
+            }
 
             if (application == "excel")
+            {
                 excelApp = new excel.Application();
+                excelApp.DisplayAlerts = false;
+                excelApp.AutomationSecurity = Microsoft.Office.Core.MsoAutomationSecurity.msoAutomationSecurityForceDisable;
+            }
 
             if (application == "powerpoint")
+            {
                 powerPointApp = new powerPoint.Application();
+                powerPointApp.DisplayAlerts = powerPoint.PpAlertLevel.ppAlertsNone;
+                powerPointApp.AutomationSecurity = Microsoft.Office.Core.MsoAutomationSecurity.msoAutomationSecurityForceDisable;
+        }
         }
 
         public static void quitApplication(string application)
