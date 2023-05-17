@@ -81,6 +81,7 @@
     <None Include="downloadExcelData.sh" />
     <None Include="downloadTestData.sh" />
     <None Include="packages.config" />
+    <None Include="resetFailed.bat" />
     <None Include="runPowerpointTest.bat" />
     <None Include="runExcelTest.bat" />
     <None Include="runWordTest.bat" />
@@ -141,6 +142,7 @@
     <PostBuildEvent>copy /Y "$(ProjectDir)runMSOTest.bat" "$(TargetDir)runMSOTest.bat"
 copy /Y "$(ProjectDir)runWordTest.bat" "$(TargetDir)runWordTest.bat"
 copy /Y "$(ProjectDir)runExcelTest.bat" "$(TargetDir)runExcelTest.bat"
+copy /Y "$(ProjectDir)resetFailed.bat" "$(TargetDir)resetFailed.bat"
 copy /Y "$(ProjectDir)runPowerpointTest.bat" "$(TargetDir)runPowerpointTest.bat"
 copy /Y "$(ProjectDir)downloadTestData.sh" "$(TargetDir)downloadTestData.sh"
 copy /Y "$(ProjectDir)downloadWordData.sh" "$(TargetDir)downloadWordData.sh"

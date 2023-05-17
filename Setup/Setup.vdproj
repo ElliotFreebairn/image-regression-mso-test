@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_3AECB303A8EE485695236EA33A04EFF1"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_40B13B39DE2B46CBB13116BCF7C66164"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -76,13 +82,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1DBE476FC1E51DB270A999450FD48625"
+        "OwnerKey" = "8:_B7969ADF9B744925BDD3DEA74D0C6446"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B7969ADF9B744925BDD3DEA74D0C6446"
+        "OwnerKey" = "8:_1DBE476FC1E51DB270A999450FD48625"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -215,6 +221,26 @@
             {
             "SourcePath" = "8:..\\downloadTestData.sh"
             "TargetName" = "8:downloadTestData.sh"
+            "Tag" = "8:"
+            "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3AECB303A8EE485695236EA33A04EFF1"
+            {
+            "SourcePath" = "8:..\\resetFailed.bat"
+            "TargetName" = "8:resetFailed.bat"
             "Tag" = "8:"
             "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
             "Condition" = "8:"
@@ -963,7 +989,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B7969ADF9B744925BDD3DEA74D0C6446"
             {
-            "SourcePath" = "8:..\\obj\\Release\\mso-test.exe"
+            "SourcePath" = "8:..\\obj\\Debug\\mso-test.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_87E517434F68427289D7E4ABC39F7BBE"
