@@ -44,14 +44,38 @@ namespace mso_test
 
         public static void quitApplication(string application)
         {
-            if (application == "word")
-                wordApp.Quit();
+            try
+            {
+                if (application == "word")
+                    wordApp.Quit();
 
-            if (application == "excel")
-                excelApp.Quit();
+                if (application == "excel")
+                    excelApp.Quit();
 
-            if (application == "powerpoint")
-                powerPointApp.Quit();
+                if (application == "powerpoint")
+                    powerPointApp.Quit();
+            }
+            catch
+            {
+                if (application == "word")
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(wordApp);
+
+                if (application == "excel")
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(excelApp);
+
+                if (application == "powerpoint")
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(powerPointApp);
+            }
+            wordApp = null;
+            excelApp = null;
+            powerPointApp = null;
+        }
+
+        public static void restartApplication(string application)
+        {
+            Console.WriteLine("Restarting application");
+            quitApplication(application);
+            startApplication(application);
         }
 
         public static HttpClient coolClient = new HttpClient() { BaseAddress = new Uri("https://staging.eu.collaboraonline.com/cool/convert-to") };
@@ -268,9 +292,29 @@ namespace mso_test
             {
                 testResult = false;
                 errorMessage = e.Message;
+                try
+                {
+                    // this statment does nothing, we just wanna make sure wordApp.Documents is valid
+                    // some docs may crash the app make Documents invalid, so here it may throw error so we restart the app
+                    var temp = wordApp.Documents;
+                }
+                catch
+                {
+                    restartApplication("word");
+                }
             }
             if (doc != null)
-                doc.Close(SaveChanges: false);
+            {
+                try
+                {
+                    doc.Close(SaveChanges: false);
+                }
+                catch
+                {
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(doc);
+                    doc = null;
+                }
+            }
 
             if (!testResult)
             {
@@ -298,10 +342,30 @@ namespace mso_test
             {
                 testResult = false;
                 errorMessage = e.Message;
+                try
+                {
+                    // this statment does nothing, we just wanna make sure excelApp.Workbooks is valid
+                    // some docs may crash the app make Workbooks invalid, so here it may throw error so we restart the app
+                    var temp = excelApp.Workbooks;
+                }
+                catch
+                {
+                    restartApplication("excel");
+                }
             }
 
             if (wb != null)
-                wb.Close(SaveChanges: false);
+            {
+                try
+                {
+                    wb.Close(SaveChanges: false);
+                }
+                catch
+                {
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(wb);
+                    wb = null;
+                }
+            }
 
             if (!testResult)
             {
@@ -329,10 +393,31 @@ namespace mso_test
             {
                 testResult = false;
                 errorMessage = e.Message;
+
+                try
+                {
+                    // this statment does nothing, we just wanna make sure powerPointApp.Presentations is valid
+                    // some docs may crash the app make Presentations invalid, so here it may throw error so we restart the app
+                    var temp = powerPointApp.Presentations;
+                }
+                catch
+                {
+                    restartApplication("powerpoint");
+                }
             }
 
             if (presentation != null)
-                presentation.Close();
+            {
+                try
+                {
+                    presentation.Close();
+                }
+                catch
+                {
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(presentation);
+                    presentation = null;
+                }
+            }
 
             if (!testResult)
             {
