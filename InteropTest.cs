@@ -116,7 +116,7 @@ namespace mso_test
             quitApplication(args[0]);
         }
 
-        public static (bool, string) testFile(string application, string fileName)
+        public static async Task<(bool, string)> testFile(string application, string fileName)
         {
             if (File.Exists(fileName + ".failed"))
                 return (false, "");
@@ -188,18 +188,36 @@ namespace mso_test
 
                 Console.WriteLine("Starting test for " + file.Name);
                 watch.Restart();
-                bool DownloadResult = testFile(application, file.FullName).Item1;
+                Task<(bool, string)> DownloadResultTask = Task.Run(() => testFile(application, file.FullName));
+                if (!DownloadResultTask.Wait(180000))
+                {
+                    Console.WriteLine("Testing timeout");
+                    restartApplication(application);
+                    try
+                    {
+                        System.IO.File.Move(file.FullName, file.FullName + ".timeout");
+                    }
+                    catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
+                    continue;
+                }
 
-                if (DownloadResult)
+                if (DownloadResultTask.Result.Item1)
                 {
                     await convertFile(application, file.FullName, Path.GetFileNameWithoutExtension(file.Name), convertTo).ContinueWith(task =>
                     {
                         if (string.IsNullOrEmpty(task.Result))
                             return;
-                        (bool, string) ConvertResult = testFile(application, task.Result);
-                        if (!ConvertResult.Item1)
+                        Task<(bool, string)> ConvertResultTask = Task.Run(() => testFile(application, task.Result));
+
+                        if (!ConvertResultTask.Wait(180000))
                         {
-                            logInfo(application, "fail", file.FullName + ": " + ConvertResult.Item2);
+                            Console.WriteLine("Testing timeout");
+                            restartApplication(application);
+                            try
+                            {
+                                System.IO.File.Move(task.Result, task.Result + ".timeout");
+                            }
+                            catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
                         }
                     });
                 }
