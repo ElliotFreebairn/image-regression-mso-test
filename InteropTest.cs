@@ -105,11 +105,6 @@ namespace mso_test
                 return;
             }
 
-            if (args[0] == "reset-failed")
-            {
-                resetFailedDownloadedFiles();
-                return;
-            }
             startApplication(args[0]);
             await testDownloadedfiles(args[0]);
 
@@ -145,33 +140,6 @@ namespace mso_test
             {
                 byte[] info = new UTF8Encoding(true).GetBytes(msg + "\n");
                 fs.Write(info, 0, info.Length);
-            }
-        }
-
-        public static void resetFailedDownloadedFiles()
-        {
-            void resetFailedFile(string dir)
-            {
-                string[] files = System.IO.Directory.GetFiles(dir, "*.failed");
-                foreach (string file in files)
-                {
-                    try
-                    {
-                        System.IO.File.Move(file, file.Substring(0, file.Length - ".failed".Length));
-                    }
-                    catch (System.IO.IOException ex) { Console.WriteLine(ex.Message); }
-                }
-            }
-
-            DirectoryInfo downloadedDirInfo = new DirectoryInfo(@"download");
-            if (!downloadedDirInfo.Exists)
-            {
-                return;
-            }
-            DirectoryInfo[] downloadedDictInfo = downloadedDirInfo.GetDirectories();
-            foreach (DirectoryInfo dict in downloadedDictInfo)
-            {
-                resetFailedFile(dict.FullName);
             }
         }
 
