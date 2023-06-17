@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * Copyright the mso-test contributors.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+using System.Collections.Generic;
 using System;
 using System.IO;
 
