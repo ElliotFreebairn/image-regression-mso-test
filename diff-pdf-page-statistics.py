@@ -58,6 +58,7 @@ def main():
     parser.add_argument("--no_save_overlay", action="store_true") # default is false
     parser.add_argument("--resolution", default="75")
     parser.add_argument("--debug", action="store_true") # default is false
+    parser.add_argument("--image_dump", action="store_true") # default is false
     args = parser.parse_args()
 
     DEBUG = args.debug
@@ -963,6 +964,11 @@ def main():
     if not os.path.isdir(EXPORT_COMPARE_DIR):
         os.makedirs(EXPORT_COMPARE_DIR)
 
+    if args.image_dump == True:
+        IMAGE_DUMP_DIR = os.path.join(base_dir, "converted", "image-dump", file_ext[0])
+        if not os.path.isdir(IMAGE_DUMP_DIR):
+            os.makedirs(IMAGE_DUMP_DIR)
+
     try:
         # The "correct" PDF: created by MS Word of the original file
         MS_ORIG_PDF = Image(filename=MS_ORIG, resolution=int(args.resolution))
@@ -1020,10 +1026,24 @@ def main():
     MS_ORIG_RED = MS_ORIG_PDF.clone()
     for pgnum in range(0, pages):
         with MS_ORIG_RED.sequence[pgnum] as page: # need this 'with' clause so that MS_ORIG_RED is actually updated with the following changes
+
+            if args.image_dump == True and pgnum+1 == pages:
+                dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_authoritative_original-{pages}.png")
+                Image(MS_ORIG_PDF.sequence[pgnum]).save(filename=dump_name)
+
             MS_ORIG_SIZE.append(page.height * page.width)
             page.transform_colorspace('gray')
+
+            if args.image_dump == True and pgnum+1 == pages:
+                dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_authoritative_grayscale-{pages}.png")
+                Image(page).save(filename=dump_name)
+
             page.alpha_channel = 'remove'         # so that 'red' will be painted as 'red' and not some transparent-ized shade of red
             page.opaque_paint('black', 'red', fuzz=MS_ORIG_PDF.quantum_range * 0.90)
+
+            if args.image_dump == True and pgnum+1 == pages:
+                dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_authoritative_red-{pages}.png")
+                Image(page).save(filename=dump_name)
 
     # Composed image: overlay red MS_ORIG with LO_ORIG
     IMPORT_IMAGE = MS_ORIG_RED.clone()
@@ -1083,12 +1103,22 @@ def main():
 
         with IMPORT_IMAGE.sequence[pgnum] as page:
             LO_ORIG_PDF.sequence[pgnum].transform_colorspace('gray')
+
+            if args.image_dump == True and pgnum+1 == pages:
+                dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_import-grayscale-{pages}.png")
+                Image(LO_ORIG_PDF.sequence[pgnum]).save(filename=dump_name)
+
             LO_ORIG_PDF.sequence[pgnum].transparent_color(LO_ORIG_PDF.background_color, 0, fuzz=LO_ORIG_PDF.quantum_range * 0.10)
             #display(Image(page))  #debug
             #display(Image(LO_ORIG_PDF.sequence[pgnum]))  #debug
             page.composite(LO_ORIG_PDF.sequence[pgnum])  # overlay (red) MS_ORIG with LO_ORIG
             page.merge_layers('flatten')
             #display(Image(page))  #debug
+
+            if args.image_dump == True and pgnum+1 == pages:
+                dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_import-overlay-{pages}.png")
+                Image(page).save(filename=dump_name)
+
         IMPORT_RED.append(0)
         try:
             IMPORT_RED[pgnum] = IMPORT_IMAGE.sequence[pgnum].histogram[wand.color.Color('red')]
@@ -1110,9 +1140,19 @@ def main():
         if IS_FILE_LO_PREV:
             with PREV_IMPORT_IMAGE.sequence[pgnum] as page:
                 LO_PREV_PDF.sequence[pgnum].transform_colorspace('gray')
+
+                if args.image_dump == True and pgnum+1 == pages:
+                    dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_prev-import-grayscale-{pages}.png")
+                    Image(LO_PREV_PDF.sequence[pgnum]).save(filename=dump_name)
+
                 LO_PREV_PDF.sequence[pgnum].transparent_color(LO_PREV_PDF.background_color, 0, fuzz=LO_PREV_PDF.quantum_range * 0.10)
                 page.composite(LO_PREV_PDF.sequence[pgnum]) # overlay (red) MS_ORIG with LO_PREV
                 page.merge_layers('flatten')
+
+                if args.image_dump == True and pgnum+1 == pages:
+                    dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_prev-import-overlay-{pages}.png")
+                    Image(page).save(filename=dump_name)
+
             try:
                 PREV_IMPORT_RED[pgnum] = PREV_IMPORT_IMAGE.sequence[pgnum].histogram[wand.color.Color('red')]
             except:
@@ -1122,9 +1162,18 @@ def main():
                 page.transform_colorspace('gray')
                 page.opaque_paint('black', 'red', fuzz=LO_ORIG_PDF.quantum_range * 0.90)
 
+                if args.image_dump == True and pgnum+1 == pages:
+                    dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_import-red-{pages}.png")
+                    Image(page).save(filename=dump_name)
+
                 LO_PREV_PDF.sequence[pgnum].transform_colorspace('gray')
                 LO_PREV_PDF.sequence[pgnum].transparent_color(LO_PREV_PDF.background_color, 0, fuzz=LO_PREV_PDF.quantum_range * 0.10)
                 LO_PREV_PDF.sequence[pgnum].opaque_paint('black', 'blue', fuzz=LO_PREV_PDF.quantum_range * 0.90)
+
+                if args.image_dump == True and pgnum+1 == pages:
+                    dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_prev-import-blue-{pages}.png")
+                    Image(LO_PREV_PDF.sequence[pgnum]).save(filename=dump_name)
+
                 page.composite(LO_PREV_PDF.sequence[pgnum]) # overlay (red) LO_ORIG with (blue) LO_PREV
 
                 MS_ORIG_PDF.sequence[pgnum].transform_colorspace('gray')
@@ -1180,6 +1229,10 @@ def main():
                 with Image(IMPORT_COMPARE_IMAGE.sequence[pageToSave]) as img_to_save:
                     file_name=os.path.join(IMPORT_COMPARE_DIR, args.base_file + f"_import-compare-{pageToSave+1}.png")
                     img_to_save.save(filename=file_name)
+
+                    if args.image_dump == True and pageToSave+1 == pages:
+                        dump_name=os.path.join(IMAGE_DUMP_DIR, args.base_file + f"_import-compare-{pages}.png")
+                        img_to_save.save(filename=dump_name)
 
         if args.no_save_overlay == False or FORCE_SAVE_EXPORT:
             printdebug(DEBUG, f"DEBUG saving {args.base_file} page {pageToSave+1} EXPORT[{EXPORT_RED[pageToSave]} PREV[{PREV_EXPORT_RED[pageToSave]}]")
