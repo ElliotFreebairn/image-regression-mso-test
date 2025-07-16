@@ -31,7 +31,7 @@ public:
   std::vector<bool> blur_edge_mask(const BMP& bmp, const std::vector<bool>& edge_map);
 
   // Compares two BMP images and generates a diff image based on the differences (the diff is applied to the base image)
-  void compare_to_bmp(BMP& base, const BMP& imported, bool enable_minor_differences);
+  void compare_to_bmp(BMP& base, BMP& imported, bool enable_minor_differences);
 
   // Generates a rgba pixel from a Colour enum
   std::array<uint8_t, 4> colour_pixel(Colour colour);

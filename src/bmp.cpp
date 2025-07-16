@@ -8,46 +8,89 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <cmath>
 #include "bmp.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <fstream>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
-// When a BMP image is created, it reads the file and populates the BMPInfoHeader and data vector
 BMP::BMP(const char* filename) {
   read(filename);
 }
 
-
 void BMP::read(const char* filename) {
-  int width, height, channels;
-  // Load the BMP image using stb_image
-  unsigned char* img_data = stbi_load(filename, &width, &height, &channels, 4);
+  std::ifstream input {filename, std::ios_base::binary};
 
-  if (!img_data) {
-    throw std::runtime_error("Failed to load BMP image");
+  if (!input) {
+    throw std::runtime_error("Can't open the BMP image file");
   }
 
-  // Populate the BMPInfoHeader and data vector
-  info_header.width = width;
-  info_header.height = height;
-  info_header.bit_count = 32; // Assuming 32-bit BMP
-  this->channels = channels;
-  data.assign(img_data, img_data + width * height * 4);
+  input.read((char*)&file_header, sizeof(file_header)); // read file header data into struct
+  if (file_header.file_type != 0x4D42) {
+    throw std::runtime_error("Not a BMP file");
+  }
 
-  stbi_image_free(img_data);
+  input.read((char*)&info_header, sizeof(info_header)); // read info header data into struct
+  if (info_header.bit_count != 32) {
+    throw std::runtime_error("Need to be in RGBA format, nothing else");
+  }
+  if (info_header.height < 0) {
+    throw std::runtime_error("The program can treat only BMP images with the origin in the bottom left corner!");
+  }
+
+  input.seekg(file_header.offset_data, input.beg);
+
+  info_header.size = sizeof(BMPInfoHeader) + sizeof(BMPColourHeader); // we know that its a 32-bit BMP
+  file_header.offset_data = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader);
+  file_header.file_size = file_header.offset_data;
+
+  row_stride = info_header.width * info_header.bit_count / 8;
+  uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
+  size_t padding_size = alligned_stride - row_stride;
+
+  std::vector<uint8_t> padding(padding_size);
+  data.resize(row_stride * info_header.height);
+
+  // read the pixel data row by row, and handle the padding if its necessary
+  for (int y = 0; y < info_header.height; y++) {
+    uint8_t* row_ptr = data.data() + y * row_stride;
+    input.read(reinterpret_cast<char*>(row_ptr), row_stride);
+
+    if (padding_size > 0) {
+      input.read(reinterpret_cast<char*>(padding.data()), padding_size); // read in the padding so next read is correct
+    }
+  }
+  file_header.file_size += data.size() + padding_size * info_header.height;
+  input.close();
 }
 
-// Write the BMP image to a file using stb_image_write
+
+
 void BMP::write(const char* filename) {
-   int success = stbi_write_bmp(filename, info_header.width, info_header.height, channels, data.data());
-    if (!success) {
-        throw std::runtime_error("Failed to write BMP image");
+  std::ofstream output{filename, std::ios_base::binary};
+  if (!output) {
+    throw std::runtime_error("Cannot open file for writing");
+  }
+
+  // write the headers
+  output.write(reinterpret_cast<const char*>(&file_header), sizeof(BMPFileHeader));
+  output.write(reinterpret_cast<const char*>(&info_header), sizeof(BMPInfoHeader));
+  output.write(reinterpret_cast<const char*>(&colour_header), sizeof(BMPColourHeader));
+
+  size_t row_stride = info_header.width * info_header.bit_count / 8;
+  size_t alligned_stride = (row_stride + 3) & ~3;
+  size_t padding_size = alligned_stride - row_stride;
+
+  std::vector<uint8_t> padding(padding_size, 0);
+
+  // write the pixel data row by row
+  for (int y = 0; y < info_header.height; y++) {
+    uint8_t* row_ptr = data.data() + y * row_stride;
+    output.write(reinterpret_cast<const char*>(row_ptr), row_stride);
+    if (padding_size > 0) {
+      output.write(reinterpret_cast<const char*>(padding.data()), padding_size);
     }
+  }
+
+  output.close();
 }
 
 int BMP::get_average_grey() const {
@@ -63,39 +106,7 @@ int BMP::get_average_grey() const {
   return total_grey / pixel_count;
 }
 
-std::vector<uint8_t>& BMP::get_data(){
-  return data;
-}
-
-const std::vector<uint8_t>& BMP::get_data() const {
-    return data;
-}
-
-int BMP::get_width() const {
-  return info_header.width;
-}
-
-int BMP::get_height() const {
-  return info_header.height;
-}
-
-int BMP::get_red_count() const {
-  return red_count;
-}
-
-int BMP::get_yellow_count() const {
-  return yellow_count;
-}
-
-void BMP::increase_red_count(int count_increase) {
-  red_count += count_increase;
-}
-
-void BMP::increase_yellow_count(int count_increase) {
-  yellow_count += count_increase;
-}
-
-void BMP::set_data(const std::vector<uint8_t>& new_data) {
+void BMP::set_data(std::vector<uint8_t>& new_data) {
   if (new_data.size() != data.size()) {
     throw std::runtime_error("New data size does not match existing data size");
   }

@@ -15,7 +15,7 @@
 #include "pixel.hpp"
 
 // Compares two BMP images and generates a diff image based on the differences
-void PixelBasher::compare_to_bmp(BMP& base, const BMP& imported, bool enable_minor_differences) {
+void PixelBasher::compare_to_bmp(BMP& base, BMP& imported, bool enable_minor_differences) {
   int32_t min_width = std::min(base.get_width(), imported.get_width());
   int32_t min_height = std::min(base.get_height(), imported.get_height());
   int32_t pixel_stride = 4;
@@ -59,12 +59,12 @@ void PixelBasher::compare_to_bmp(BMP& base, const BMP& imported, bool enable_min
         if (near_edge) {
           if (enable_minor_differences) { // If minor differences are enabled, we use yellow for pixels near edges
             bgra = colour_pixel(Colour::YELLOW);
-            base.increase_yellow_count(1);
+            base.increment_yellow_count(1);
           }
         } else {
           // If the pixel is not near an edge, we use red for significant differences
           bgra = colour_pixel(Colour::RED);
-          base.increase_red_count(1);
+          base.increment_red_count(1);
         }
       }
       for (int i = 0; i < pixel_stride; i++) {
@@ -150,6 +150,6 @@ std::array<uint8_t, 4> PixelBasher::colour_pixel(Colour colour) {
   if (colour == Colour::YELLOW) {
     return {0, 197, 255, 255};
   } else {
-    return {255, 0, 0, 255};
+    return {0, 0, 255, 255};
   }
 }
