@@ -79,6 +79,50 @@ BMP PixelBasher::compare_to_bmp(BMP& base, BMP& imported, bool enable_minor_diff
   return diff_result; // Return the modified base image with the diff applied
 }
 
+BMP PixelBasher::compare_regressions(BMP& base, BMP& imported, BMP& imported_previous) {
+  int32_t min_width = std::min(base.get_width(), imported.get_width());
+  int32_t min_height = std::min(base.get_height(), imported.get_height());
+  int32_t pixel_stride = 4;
+
+  BMP diff_result(base);
+
+  // The diff data is based on the base image, so we create a new data vector to hold the modified pixels
+  std::vector<uint8_t> new_data = base.get_data();
+
+  int32_t base_stride = base.get_width();
+  int32_t imported_stride = imported.get_width();
+  int32_t imported_previous_stride = imported_previous.get_width();
+
+  for (int y = 0; y < min_height; y++) {
+    for (int x = 0; x < min_width; x++) {
+      int current_index = (y * base_stride + x) * pixel_stride;
+      int input_index = (y * imported_stride + x) * pixel_stride;
+      int input_previous_index = (y * imported_previous_stride + x) * pixel_stride;
+
+      Pixel base_pixel = Pixel::get_pixel(base.get_data(), current_index);
+      Pixel imported_pixel = Pixel::get_pixel(imported.get_data(), input_index);
+      Pixel improted_previous_pixel = Pixel::get_pixel(imported_previous.get_data(), input_previous_index);
+      std::array<uint8_t, 4> bgra = {base_pixel.blue, base_pixel.green, base_pixel.red, base_pixel.alpha};
+
+      // three cases: PrevLO correct LO wrong = red, PrevLO wrong LO correct = green,  Both wrong = blue, Both correct = none
+      // first case:
+      if (!improted_previous_pixel.is_red() && imported_pixel.is_red()) {
+        bgra = colour_pixel(Colour::RED);
+      } else if (improted_previous_pixel.is_red() && !imported_pixel.is_red()) {
+        bgra = colour_pixel(Colour::GREEN);
+      } else if (improted_previous_pixel.is_red() && imported_pixel.is_red()) {
+        bgra = colour_pixel(Colour::BLUE);
+      }
+
+      for (int i = 0; i < pixel_stride; i++) {
+        new_data[current_index + i] = bgra[i];
+      }
+    }
+  }
+  diff_result.set_data(new_data);
+  return diff_result;
+}
+
 std::vector<bool> PixelBasher::sobel_edges(BMP& bmp, int threshold) {
   int32_t width = bmp.get_width();
   int32_t height = bmp.get_height();
@@ -152,7 +196,12 @@ std::vector<bool> PixelBasher::blur_edge_mask(const BMP& bmp, const std::vector<
 std::array<uint8_t, 4> PixelBasher::colour_pixel(Colour colour) {
   if (colour == Colour::YELLOW) {
     return {0, 197, 255, 255};
-  } else {
+  } else if (colour == Colour::RED) {
     return {0, 0, 255, 255};
+  } else if (colour == Colour::BLUE) {
+    return {255, 0, 0, 255};
+  } else if (colour == Colour::GREEN) {
+    return {0, 255, 0, 255};
   }
+  return {0, 0, 0, 0};
 }

@@ -22,6 +22,8 @@ public:
   enum Colour {
     RED,
     YELLOW,
+    BLUE,
+    GREEN
   };
 
   // Sobel edge detection algorithm to find edges in the BMP image
@@ -32,6 +34,8 @@ public:
 
   // Compares two BMP images and generates a diff image based on the differences (the diff is applied to the base image)
   BMP compare_to_bmp(BMP& base, BMP& imported, bool enable_minor_differences);
+
+  BMP compare_regressions(BMP& base, BMP& imported, BMP& imported_previous);
 
   // Generates a rgba pixel from a Colour enum
   std::array<uint8_t, 4> colour_pixel(Colour colour);
