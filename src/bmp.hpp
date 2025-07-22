@@ -68,8 +68,8 @@ public:
   int get_width() const { return info_header.width; }
   int get_height() const { return info_header.height; }
 
-  int get_red_count() { return red_count; }
-  int get_yellow_count() { return yellow_count; }
+  int get_red_count() const { return red_count; }
+  int get_yellow_count() const { return yellow_count; }
   int get_background_value() const { return background_value; }
   int get_non_background_count() const { return non_background_count; }
   std::string get_basename() const { return basename; }
