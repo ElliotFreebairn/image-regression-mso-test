@@ -45,5 +45,9 @@ struct Pixel {
   bool is_near_white(int white_threshold = 240) const {
     return red > white_threshold;
   }
+
+  bool is_red() {
+    return (blue == 0 && green == 0 && red == 255);
+  }
 };
 #endif
