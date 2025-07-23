@@ -15,118 +15,117 @@
 #include "pixel.hpp"
 
 // Compares two BMP images and generates a diff image based on the differences
-BMP PixelBasher::compare_to_bmp(BMP& base, BMP& imported, bool enable_minor_differences) {
-  int32_t min_width = std::min(base.get_width(), imported.get_width());
-  int32_t min_height = std::min(base.get_height(), imported.get_height());
+BMP PixelBasher::compare_to_bmp(BMP& original, BMP& target, bool enable_minor_differences) {
+  int32_t min_width = std::min(original.get_width(), target.get_width());
+  int32_t min_height = std::min(original.get_height(), target.get_height());
   int32_t pixel_stride = 4;
 
-  BMP diff_result(base);
+  BMP diff(original);
 
   // Retrieve the edge maps for both images using the Sobel algorithm (which pixels are edges)
-  std::vector<bool> auth_edge_map = sobel_edges(base);
-  std::vector<bool> input_edge_map = sobel_edges(imported);
+  std::vector<bool> original_edge_map = sobel_edges(original);
+  std::vector<bool> target_edge_map = sobel_edges(target);
 
-  // Blur the edge maps to create a mask that includes nearby pixels (based on a given radius)
-  std::vector<bool> auth_blurred_edge_mask = blur_edge_mask(base, auth_edge_map);
-  std::vector<bool> input_blurred_edge_mask = blur_edge_mask(imported, input_edge_map);
+  // Blur the edge maps to create a mask that includes nearby pixels (originald on a given radius)
+  std::vector<bool> original_blurred_mask = blur_edge_mask(original, original_edge_map);
+  std::vector<bool> target_blurred_mask = blur_edge_mask(target, target_edge_map);
 
   // Create an intersection mask that combines both blurred edge masks, to be used later for comparison
   // This mask will be true for pixels that are edges in both images
   std::vector<bool> intersection_mask(min_width * min_height, false);
   for (int i = 0; i < min_width * min_height; i++) {
-    intersection_mask[i] = auth_blurred_edge_mask[i] && input_blurred_edge_mask[i];
+    intersection_mask[i] = original_blurred_mask[i] && target_blurred_mask[i];
   }
 
   // The diff data is based on the base image, so we create a new data vector to hold the modified pixels
-  std::vector<uint8_t> new_data = base.get_data();
+  std::vector<uint8_t> diff_data = original.get_data();
 
-  int32_t base_stride = base.get_width();
-  int32_t imported_stride = imported.get_width();
+  int32_t original_stride = original.get_width();
+  int32_t target_stride = target.get_width();
   // Loops through the min width and height, if size of images differ slightly.
   for (int y = 0; y < min_height; y++) {
     for (int x = 0; x < min_width; x++) {
       // Calculate the current index in the data vector for both images
       // The intersection mask is based on height and width not stride, so we calculate it separately
-      int current_index = (y * base_stride + x) * pixel_stride;
-      int input_index = (y * imported_stride + x) * pixel_stride;
+      int original_index = (y * original_stride + x) * pixel_stride;
+      int target_index = (y * target_stride + x) * pixel_stride;
       int mask_index = y * min_width + x;
 
-      Pixel p1 = Pixel::get_pixel(base.get_data(), current_index);
-      Pixel p2 = Pixel::get_pixel(imported.get_data(), input_index);
-      std::array<uint8_t, 4> bgra = {p1.blue, p1.green, p1.red, p1.alpha};
+      Pixel original_pixel = Pixel::get_pixel(original.get_data(), original_index);
+      Pixel target_pixel = Pixel::get_pixel(target.get_data(), target_index);
+      std::array<uint8_t, 4> bgra = {original_pixel.blue, original_pixel.green, original_pixel.red, original_pixel.alpha};
 
       // If the pixels differ, we need to determine if they are near an edge and apply the appropriate colour
       bool near_edge = intersection_mask[mask_index];
-      if (p1.differs_from(p2, near_edge)) {
+      if (original_pixel.differs_from(target_pixel, near_edge)) {
         if (near_edge) {
-          if (enable_minor_differences) { // If minor differences are enabled, we use yellow for pixels near edges
-            bgra = colour_pixel(Colour::YELLOW);
-            diff_result.increment_yellow_count(1);
-          }
+          // If minor differences are enabled, we use yellow for pixels near edges
+          if (enable_minor_differences)
+              bgra = colour_pixel(Colour::YELLOW);
+          diff.increment_yellow_count(1);
         } else {
           // If the pixel is not near an edge, we use red for significant differences
           bgra = colour_pixel(Colour::RED);
-          diff_result.increment_red_count(1);
+          diff.increment_red_count(1);
         }
       }
       for (int i = 0; i < pixel_stride; i++) {
-        new_data[current_index + i] = bgra[i];
+        diff_data[original_index + i] = bgra[i];
       }
     }
   }
   // Set the new data to the base image, which now contains the diff
-  diff_result.set_data(new_data);
-  return diff_result; // Return the modified base image with the diff applied
+  diff.set_data(diff_data);
+  return diff; // Return the modified base image with the diff applied
 }
 
-BMP PixelBasher::compare_regressions(BMP& base, BMP& imported, BMP& imported_previous) {
-  int32_t min_width = std::min(base.get_width(), imported.get_width());
-  int32_t min_height = std::min(base.get_height(), imported.get_height());
+BMP PixelBasher::compare_regressions(BMP& original, BMP& current, BMP& previous) {
+  int32_t min_width = std::min(original.get_width(), current.get_width());
+  int32_t min_height = std::min(original.get_height(), current.get_height());
   int32_t pixel_stride = 4;
 
-  BMP diff_result(base);
+  BMP diff(original);
 
   // The diff data is based on the base image, so we create a new data vector to hold the modified pixels
-  std::vector<uint8_t> new_data = base.get_data();
+  std::vector<uint8_t> diff_data = original.get_data();
 
-  int32_t base_stride = base.get_width();
-  int32_t imported_stride = imported.get_width();
-  int32_t imported_previous_stride = imported_previous.get_width();
+  int32_t original_stride = original.get_width();
+  int32_t current_stride = current.get_width();
+  int32_t previous_stride = previous.get_width();
 
   for (int y = 0; y < min_height; y++) {
     for (int x = 0; x < min_width; x++) {
-      int current_index = (y * base_stride + x) * pixel_stride;
-      int input_index = (y * imported_stride + x) * pixel_stride;
-      int input_previous_index = (y * imported_previous_stride + x) * pixel_stride;
+      int original_index = (y * original_stride + x) * pixel_stride;
+      int current_index = (y * current_stride + x) * pixel_stride;
+      int previous_index = (y * previous_stride + x) * pixel_stride;
 
-      Pixel base_pixel = Pixel::get_pixel(base.get_data(), current_index);
-      Pixel imported_pixel = Pixel::get_pixel(imported.get_data(), input_index);
-      Pixel improted_previous_pixel = Pixel::get_pixel(imported_previous.get_data(), input_previous_index);
-      std::array<uint8_t, 4> bgra = {base_pixel.blue, base_pixel.green, base_pixel.red, base_pixel.alpha};
+      Pixel original_pixel = Pixel::get_pixel(original.get_data(), original_index);
+      Pixel current_pixel = Pixel::get_pixel(current.get_data(), current_index);
+      Pixel previous_pixel = Pixel::get_pixel(previous.get_data(), previous_index);
+      std::array<uint8_t, 4> bgra = {original_pixel.blue, original_pixel.green, original_pixel.red, original_pixel.alpha};
 
       // three cases: PrevLO correct LO wrong = red, PrevLO wrong LO correct = green,  Both wrong = blue, Both correct = none
-      // first case:
-      if (!improted_previous_pixel.is_red() && imported_pixel.is_red()) {
+      if (!previous_pixel.is_red() && current_pixel.is_red()) {
         bgra = colour_pixel(Colour::RED);
-      } else if (improted_previous_pixel.is_red() && !imported_pixel.is_red()) {
+      } else if (previous_pixel.is_red() && !current_pixel.is_red()) {
         bgra = colour_pixel(Colour::GREEN);
-      } else if (improted_previous_pixel.is_red() && imported_pixel.is_red()) {
+      } else if (previous_pixel.is_red() && current_pixel.is_red()) {
         bgra = colour_pixel(Colour::BLUE);
       }
 
       for (int i = 0; i < pixel_stride; i++) {
-        new_data[current_index + i] = bgra[i];
+        diff_data[current_index + i] = bgra[i];
       }
     }
   }
-  diff_result.set_data(new_data);
-  return diff_result;
+  diff.set_data(diff_data);
+  return diff;
 }
 
-std::vector<bool> PixelBasher::sobel_edges(BMP& bmp, int threshold) {
-  int32_t width = bmp.get_width();
-  int32_t height = bmp.get_height();
-  const std::vector<uint8_t>& data = bmp.get_data();
+std::vector<bool> PixelBasher::sobel_edges(BMP& image, int threshold) {
+  int32_t width = image.get_width();
+  int32_t height = image.get_height();
+  const std::vector<uint8_t>& data = image.get_data();
   int32_t pixel_stride = 4;
 
   // Initalise the result vector to false, indicating no edges found initially
@@ -158,13 +157,12 @@ std::vector<bool> PixelBasher::sobel_edges(BMP& bmp, int threshold) {
       result[y * width + x] = (magnitude >= threshold);
     }
   }
-
   return result;
 }
 
-std::vector<bool> PixelBasher::blur_edge_mask(const BMP& bmp, const std::vector<bool>& edge_map) {
-  int32_t width = bmp.get_width();
-  int32_t height = bmp.get_height();
+std::vector<bool> PixelBasher::blur_edge_mask(const BMP& image, const std::vector<bool>& edge_map) {
+  int32_t width = image.get_width();
+  int32_t height = image.get_height();
   std::vector<bool> blurred_mask(width * height, false);
 
   for (int y = 1; y < height - 1; y++) {

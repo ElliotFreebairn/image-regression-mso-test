@@ -63,7 +63,6 @@ public:
   const BMPColourHeader& get_colour_header() { return colour_header; }
 
   const std::vector<uint8_t>& get_data() const { return data; }
-  size_t get_row_stride() { return row_stride; }
 
   int get_width() const { return info_header.width; }
   int get_height() const { return info_header.height; }
@@ -72,27 +71,19 @@ public:
   int get_yellow_count() const { return yellow_count; }
   int get_background_value() const { return background_value; }
   int get_non_background_count() const { return non_background_count; }
-  std::string get_basename() const { return basename; }
 
   void increment_red_count(int new_red) { red_count += new_red; }
   void increment_yellow_count(int new_yellow) { yellow_count += new_yellow; }
 
   void set_data(std::vector<uint8_t>& new_data);
-
-  std::string print_stats();
-
 private:
   int get_average_colour() const;
   int get_non_background_pixel_count(int background_value) const;
 
-  std::string basename;
-
   BMPFileHeader file_header;
   BMPInfoHeader info_header;
   BMPColourHeader colour_header;
-
   std::vector<uint8_t> data;
-  size_t row_stride;
 
   int red_count = 0;
   int yellow_count = 0;

@@ -1093,7 +1093,10 @@ def main():
     if args.image_dump == True:
         print("Image dump directory: ", IMAGE_DUMP_DIR) # need to figure what to do/what justin did with image-dump stuff
 
+    # Where the pdf's will be converted to BMP's and deleted once used
     CONVERTED_DIR = os.path.join(base_dir, "converted")
+    HISTORY_DIR = args.history_dir
+
     # Convert the MSO PDF to bmp's
     subprocess.run([
         "magick",
@@ -1133,6 +1136,7 @@ def main():
         CONVERTED_DIR + "/import_mso-page.bmp"
     ])
 
+    # Convert to the previous LO PDF's to BMP's
     if IS_FILE_LO_PREV:
         subprocess.run([
             "magick",
@@ -1147,6 +1151,7 @@ def main():
             args.history_dir + "/import-page.bmp"
         ])
 
+    # Convert the previus MSO Roundtripped PDF's to BMP's
     if IS_FILE_MS_PREV:
         subprocess.run([
             "magick",
@@ -1166,17 +1171,17 @@ def main():
     # os.makedirs(DIFF_OUTPUT_DIR, exist_ok=True)
 
     # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
-    auth_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
-    import_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import-*.bmp")))
+    ms_orig_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
+    lo_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import-*.bmp")))
     ms_conv_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import_mso*.bmp")))
-    import_prev_pages = []
-    ms_conv_prev_pages = []
+    lo_previous_pages = []
+    ms_conv_previous_pages = []
 
 
     if IS_FILE_LO_PREV:
-        import_prev_pages = sorted(glob.glob(os.path.join(args.history_dir, "import-*.bmp")))
+        lo_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import-*.bmp")))
     if IS_FILE_MS_PREV:
-        ms_conv_prev_pages = sorted(glob.glob(os.path.join(args.history_dir, "import_mso*.bmp")))
+        ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import_mso*.bmp")))
 
     options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.minor_differences)]
 
@@ -1184,11 +1189,11 @@ def main():
     subprocess.run(
         [PIXELBASHER_BIN] +
         [args.base_file] +
-        auth_pages +
-        import_pages +
+        ms_orig_pages +
+        lo_pages +
         ms_conv_pages +
-        import_prev_pages +
-        ms_conv_prev_pages +
+        lo_previous_pages +
+        ms_conv_previous_pages +
         [IMPORT_DIR] +
         [EXPORT_DIR] +
         [IMPORT_COMPARE_DIR] +
@@ -1198,19 +1203,19 @@ def main():
         check=True
     )
 
-    for page in auth_pages:
+    for page in ms_orig_pages:
         os.remove(page)
-    for page in import_pages:
+    for page in lo_pages:
         os.remove(page)
     for page in ms_conv_pages:
         os.remove(page)
 
     if IS_FILE_LO_PREV:
-        for page in import_prev_pages:
+        for page in lo_previous_pages:
             os.remove(page)
 
     if IS_FILE_MS_PREV:
-        for page in ms_conv_prev_pages:
+        for page in ms_conv_previous_pages:
             os.remove(page)
 
 if __name__ == "__main__":

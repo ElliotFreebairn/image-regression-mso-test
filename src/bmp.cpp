@@ -14,7 +14,6 @@
 
 BMP::BMP(const char* filename, std::string basename) {
   read(filename);
-  this->basename = basename;
   background_value = get_average_colour();
   non_background_count = get_non_background_pixel_count(background_value);
 }
@@ -24,7 +23,6 @@ BMP::BMP(const BMP& other) {
   info_header = other.info_header;
   colour_header = other.colour_header;
   data = other.data;
-  row_stride = other.row_stride;
   red_count = other.red_count;
   yellow_count = other.yellow_count;
   background_value = other.background_value;
@@ -57,7 +55,7 @@ void BMP::read(const char* filename) {
   file_header.offset_data = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader);
   file_header.file_size = file_header.offset_data;
 
-  row_stride = info_header.width * info_header.bit_count / 8;
+  int32_t row_stride = info_header.width * info_header.bit_count / 8;
   uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
   size_t padding_size = alligned_stride - row_stride;
 
@@ -138,17 +136,4 @@ void BMP::set_data(std::vector<uint8_t>& new_data) {
     throw std::runtime_error("New data size does not match existing data size");
   }
   data = new_data;
-}
-
-std::string BMP::print_stats() {
-  size_t total_pixels = static_cast<size_t>(get_width() * get_height());
-  double red_percentage = (static_cast<double>(red_count) / total_pixels) * 100;
-  double yellow_percentage = (static_cast<double>(yellow_count) / total_pixels) * 100;
-  double red_yellow_percentage = (static_cast<double>(red_count + yellow_count) / total_pixels) * 100;
-
-  std::string stats = "Total pixels = "  + std::to_string(total_pixels) + " | Red pixels = " + std::to_string(red_count) +
-    " | Yellow pixels = " + std::to_string(yellow_count) + "\nRed percentage = " + std::to_string(red_percentage) + "% | Yellow percetange = " +
-    std::to_string(yellow_percentage) + "% | Red & Yellow percentage = " + std::to_string(red_yellow_percentage);
-
-  return stats;
 }
