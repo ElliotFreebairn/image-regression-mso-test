@@ -114,8 +114,9 @@ ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
 	}
 
 	if (args.ms_previous) {
+		int offset = args.lo_previous ? 4 : 3;
 		for (int i = 0; i < num_pages; i++) {
-			args.ms_conv_previous_images.push_back(BMP(argv[i + 2 + num_pages * 4], args.basename));
+			args.ms_conv_previous_images.push_back(BMP(argv[i + 2 + num_pages * offset], args.basename));
 		}
 	}
 	return args;
