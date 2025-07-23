@@ -1120,13 +1120,65 @@ def main():
         CONVERTED_DIR + "/import-page.bmp"
     ])
 
-    PIXELBASHER_BIN = "./pixelbasher"
+    # Convert the MSO Roundtripped PDF's to BMP's
+    subprocess.run([
+        "magick",
+        MS_CONV,
+        "-density", args.resolution,
+        "-colorspace", "Gray",
+        "-define", "bmp:format=bmp4",
+        "-background", "white",
+        "-alpha", "remove",
+        "-alpha", "on",
+        CONVERTED_DIR + "/import_mso-page.bmp"
+    ])
+
+    if IS_FILE_LO_PREV:
+        subprocess.run([
+            "magick",
+            LO_PREV,
+            "-density",
+            args.resolution,
+            "-colorspace", "Gray",
+            "-define", "bmp:format=bmp4",
+            "-background", "white",
+            "-alpha", "remove",
+            "-alpha", "on",
+            args.history_dir + "/import-page.bmp"
+        ])
+
+    if IS_FILE_MS_PREV:
+        subprocess.run([
+            "magick",
+            MS_PREV,
+            "-density",
+            args.resolution,
+            "-colorspace", "Gray",
+            "-define", "bmp:format=bmp4",
+            "-background", "white",
+            "-alpha", "remove",
+            "-alpha", "on",
+             args.history_dir + "/import_mso-page.bmp"
+        ])
+
+    PIXELBASHER_BIN = base_dir + "pixelbasher"
     # DIFF_OUTPUT_DIR = os.path.join(IMAGE_DUMP_DIR, "diffs/")
     # os.makedirs(DIFF_OUTPUT_DIR, exist_ok=True)
 
-    # Sorting pages to ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
+    # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
     auth_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
     import_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import-*.bmp")))
+    ms_conv_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import_mso*.bmp")))
+    import_prev_pages = []
+    ms_conv_prev_pages = []
+
+
+    if IS_FILE_LO_PREV:
+        import_prev_pages = sorted(glob.glob(os.path.join(args.history_dir, "import-*.bmp")))
+    if IS_FILE_MS_PREV:
+        ms_conv_prev_pages = sorted(glob.glob(os.path.join(args.history_dir, "import_mso*.bmp")))
+
+    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.minor_differences)]
 
     # Run pixelbasher to compare differnces between MSO and LO PDF pages
     subprocess.run(
@@ -1134,9 +1186,15 @@ def main():
         [args.base_file] +
         auth_pages +
         import_pages +
+        ms_conv_pages +
+        import_prev_pages +
+        ms_conv_prev_pages +
         [IMPORT_DIR] +
         [EXPORT_DIR] +
-        ["false", str(args.minor_differences)], # options: 1st: diff mso_roundtrip files, 2nd: minor differences
+        [IMPORT_COMPARE_DIR] +
+        [EXPORT_COMPARE_DIR] +
+        options,
+        #["false", str(args.minor_differences)], # options: 1st: diff mso_roundtrip files, 2nd: minor differences
         check=True
     )
 
@@ -1144,7 +1202,16 @@ def main():
         os.remove(page)
     for page in import_pages:
         os.remove(page)
+    for page in ms_conv_pages:
+        os.remove(page)
 
+    if IS_FILE_LO_PREV:
+        for page in import_prev_pages:
+            os.remove(page)
+
+    if IS_FILE_MS_PREV:
+        for page in ms_conv_prev_pages:
+            os.remove(page)
 
 if __name__ == "__main__":
     main()
