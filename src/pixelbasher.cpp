@@ -30,7 +30,6 @@ BMP PixelBasher::compare_to_bmp(BMP& original, BMP& target, bool enable_minor_di
   std::vector<bool> original_blurred_mask = blur_edge_mask(original, original_edge_map);
   std::vector<bool> target_blurred_mask = blur_edge_mask(target, target_edge_map);
 
-  // Create an intersection mask that combines both blurred edge masks, to be used later for comparison
   // This mask will be true for pixels that are edges in both images
   std::vector<bool> intersection_mask(min_width * min_height, false);
   for (int i = 0; i < min_width * min_height; i++) {
@@ -192,14 +191,21 @@ std::vector<bool> PixelBasher::blur_edge_mask(const BMP& image, const std::vecto
 }
 
 std::array<uint8_t, 4> PixelBasher::colour_pixel(Colour colour) {
-  if (colour == Colour::YELLOW) {
+  switch (colour)
+  {
+  case Colour::YELLOW:
     return {0, 197, 255, 255};
-  } else if (colour == Colour::RED) {
+    break;
+  case Colour::RED:
     return {0, 0, 255, 255};
-  } else if (colour == Colour::BLUE) {
+    break;
+  case Colour::BLUE:
     return {255, 0, 0, 255};
-  } else if (colour == Colour::GREEN) {
+    break;
+  case Colour::GREEN:
     return {0, 255, 0, 255};
+    break;
+  default:
+    throw std::runtime_error("Invalid colour enum passed");
   }
-  return {0, 0, 0, 0};
 }

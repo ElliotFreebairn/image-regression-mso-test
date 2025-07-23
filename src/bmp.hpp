@@ -17,7 +17,6 @@
 #include <iostream>
 
 #pragma pack(push, 1)
-
 struct BMPFileHeader {
   uint16_t file_type{0x4D42}; // BM
   uint32_t file_size{0};
