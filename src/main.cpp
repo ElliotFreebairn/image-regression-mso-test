@@ -24,103 +24,15 @@ struct ParsedArguments {
 	std::string export_dir;
 	std::string import_compare_dir;
 	std::string export_compare_dir;
-	bool enable_minor_differences;
-	bool lo_previous;
-	bool ms_previous;
 	std::vector<BMP> ms_orig_images;
 	std::vector<BMP> lo_images;
 	std::vector<BMP> ms_conv_images;
 	std::vector<BMP> lo_previous_images;
 	std::vector<BMP> ms_conv_previous_images;
+	bool enable_minor_differences;
+	bool lo_previous;
+	bool ms_previous;
 };
-
-ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
-	if (argc < 10) {
-		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
-		"ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..."  +
-		"[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
-		"import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ [lo_previous] [ms_preivous] [enable_minor_differences]");
-	}
-
-	ParsedArguments args;
-	int arg_index = argc;
-
-	// Deals with [enable_minor_differences]
-	std::string last_arg = argv[arg_index - 1];
-	if (last_arg == "true" || last_arg == "false") {
-		args.enable_minor_differences = (last_arg == "true");
-		arg_index--;
-	} else {
-		throw std::runtime_error("Incorrect usage: should either be true of false enabling minor differences");
-	}
-
-	// Deals with [ms_previous]
-	last_arg = argv[arg_index - 1];
-	if (last_arg == "true" || last_arg == "false") {
-		args.ms_previous = (last_arg == "true");
-		arg_index--;
-	} else {
-		throw std::runtime_error("Incorrect usage: should either be true of false for including ms_previous files");
-	}
-
-	// Deals with [ms_preivous]
-	last_arg = argv[arg_index - 1];
-	if (last_arg == "true" || last_arg == "false") {
-		args.lo_previous = (last_arg == "true");
-		arg_index--;
-	} else {
-		throw std::runtime_error("Incorrect usage: should either be true of false for including ms_previous files");
-	}
-
-	args.export_compare_dir = argv[arg_index - 1];
-	args.import_compare_dir = argv[arg_index - 2];
-	args.export_dir = argv[arg_index - 3];
-	args.import_dir = argv[arg_index - 4];
-
-
-	args.basename = argv[1]; // The first argument is the basename of the file, not used in this context
-	size_t dot_pos = args.basename.find_last_of('.');
-	args.extension = (dot_pos != std::string::npos) ? args.basename.substr(dot_pos + 1) : "";
-
-	if (args.lo_previous) {
-		pdf_count++;
-	}
-	if (args.ms_previous) {
-		pdf_count++;
-	}
-
-	int num_image_args = arg_index - 6; // exclude program, basename, import, export, import_compare, export_compare dir
-	if (num_image_args % pdf_count != 0) {
-		throw std::runtime_error("Error: Mismatched number of authoritative and import pages.");
-	}
-
-	int num_pages = num_image_args / pdf_count;
-	for (int i = 0; i < num_pages; i++) {
-		args.ms_orig_images.push_back(BMP(argv[i + 2], args.basename)); // Plus one to skip the program name
-	}
-
-	for (int i = 0; i < num_pages; i++) {
-		args.lo_images.push_back(BMP(argv[i + 2 + num_pages], args.basename)); // Import pages start after the authoritative pages
-	}
-
-	for (int i = 0; i < num_pages; i++) {
-		args.ms_conv_images.push_back(BMP(argv[i + 2 + num_pages * 2], args.basename)); // Export pages start after the import page
-	}
-
-	if (args.lo_previous) {
-		for (int i = 0; i < num_pages; i++) {
-			args.lo_previous_images.push_back(BMP(argv[i + 2 + num_pages * 3], args.basename));
-		}
-	}
-
-	if (args.ms_previous) {
-		int offset = args.lo_previous ? 4 : 3;
-		for (int i = 0; i < num_pages; i++) {
-			args.ms_conv_previous_images.push_back(BMP(argv[i + 2 + num_pages * offset], args.basename));
-		}
-	}
-	return args;
-}
 
 void write_stats_to_csv(const BMP& image1, const BMP& image2, const BMP& diff, int page_number, std::string basename,
      std::string filename)
@@ -145,6 +57,120 @@ void write_stats_to_csv(const BMP& image1, const BMP& image2, const BMP& diff, i
             << (static_cast<double>(diff.get_red_count()) / image2_total_pixels) << "\n";
 }
 
+void parse_flag(int &arg_index, bool &option, std::string value, std::string option_name) {
+	if (value == "true" || value == "false") {
+		option = (value == "true");
+		arg_index--;
+	} else {
+		throw std::runtime_error("Incorrect usage for " + option_name + ": " + value + " should be true of flase");
+	}
+}
+
+void parse_flags(int& arg_index, char* argv[], ParsedArguments& args) {
+	std::string minor_differences = argv[arg_index - 1];
+	parse_flag(arg_index, args.enable_minor_differences, minor_differences, "minor-differences");
+
+	std::string ms_previous = argv[arg_index - 1];
+	parse_flag(arg_index, args.ms_previous, ms_previous, "ms_previous");
+
+	std::string lo_previous = argv[arg_index - 1];
+	parse_flag(arg_index, args.lo_previous, lo_previous, "lo_previous");
+}
+
+void parse_directories(int &arg_index, char *argv[], ParsedArguments& args) {
+	args.export_compare_dir = argv[--arg_index];
+	args.import_compare_dir = argv[--arg_index];
+	args.export_dir = argv[--arg_index];
+	args.import_dir = argv[--arg_index];
+}
+
+void parse_image_group(char *argv[], int start, int pages, std::vector<BMP>& images, const std::string& basename) {
+	for (int i = 0; i < pages; i++) {
+		images.push_back(BMP(argv[start + i], basename));
+	}
+}
+
+ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
+	if (argc < 10) {
+		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
+		"ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..."  +
+		"[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
+		"import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ [lo_previous] [ms_preivous] [enable_minor_differences]");
+	}
+
+	ParsedArguments args;
+	int arg_index = argc;
+
+	parse_flags(arg_index, argv, args);
+	parse_directories(arg_index, argv, args);
+
+	args.basename = argv[1];
+	size_t dot_pos = args.basename.find_last_of('.');
+	args.extension = (dot_pos != std::string::npos) ? args.basename.substr(dot_pos + 1) : "";
+
+	if (args.lo_previous) pdf_count++;
+	if (args.ms_previous) pdf_count++;
+
+	int num_image_args = arg_index - 2; // exclude program, basename
+	if (num_image_args % pdf_count != 0) {
+		throw std::runtime_error("Error: Mismatched number of authoritative and import pages.");
+	}
+
+	int num_pages = num_image_args / pdf_count;
+	int offset = 2;
+
+	parse_image_group(argv, offset, num_pages, args.ms_orig_images, args.basename);
+	offset += num_pages;
+
+	parse_image_group(argv, offset, num_pages, args.lo_images, args.basename);
+	offset += num_pages;
+
+	parse_image_group(argv, offset, num_pages, args.ms_conv_images, args.basename);
+	offset += num_pages;
+
+	if (args.lo_previous) {
+		parse_image_group(argv, offset, num_pages, args.lo_previous_images, args.basename);
+		offset += num_pages;
+	}
+
+	if (args.ms_previous) {
+		parse_image_group(argv, offset, num_pages, args.ms_conv_previous_images, args.basename);
+		offset += num_pages;
+	}
+	return args;
+}
+
+BMP diff_and_write(PixelBasher& pixel_basher, BMP& base, BMP& target, bool allow_minor_diffs, const std::string& output_path) {
+	BMP diff = pixel_basher.compare_to_bmp(base, target, allow_minor_diffs);
+	diff.write(output_path.c_str());
+	return diff;
+}
+
+void compare_lo_previous(PixelBasher& pixelbasher, BMP& base, BMP& lo_diff, BMP& lo_previous,
+						size_t page_index, const ParsedArguments& args)
+{
+	std::string lo_prev_diff_path = args.import_dir + "/"  + args.basename + "_prev-import-page-" + std::to_string(page_index + 1) + ".bmp";
+	BMP lo_prev_diff = pixelbasher.compare_to_bmp(base, lo_previous, args.enable_minor_differences);
+	lo_prev_diff.write(lo_prev_diff_path.c_str());
+
+	std::string compare_path = args.import_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(page_index + 1) + ".bmp";
+	BMP lo_version_diff = pixelbasher.compare_regressions(base, lo_diff, lo_prev_diff);
+	lo_version_diff.write(compare_path.c_str());
+}
+
+void compare_ms_previous(PixelBasher& pixelbasher, BMP& base, BMP& ms_conv_diff, BMP& ms_conv_previous,
+						size_t page_index, const ParsedArguments& args)
+{
+	std::string prev_diff_path = args.export_dir + "/"  + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
+	BMP ms_prev_diff = pixelbasher.compare_to_bmp(base, ms_conv_previous, args.enable_minor_differences);
+	ms_prev_diff.write(prev_diff_path.c_str());
+
+	std::string compare_path = args.export_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(page_index + 1) + ".bmp";
+	BMP version_diff = pixelbasher.compare_regressions(base, ms_conv_diff, ms_prev_diff);
+	version_diff.write(compare_path.c_str());
+}
+
+
 // Main function to compare two BMP images and generate a diff image
 // Usage: pixelbasher base.bmp input.bmp output.bmp [enable_minor_differences]
 // The last argument is optional and can be "true" or "false" to enable
@@ -153,6 +179,7 @@ int main(int argc, char* argv[])
 	try {
 		ParsedArguments args = parse_arguments(argc, argv);
 		PixelBasher pixel_basher;
+		const std::string csv_filename = "diff-pdf-" + args.extension;
 
 		size_t num_pages = args.ms_orig_images.size();
 		if (num_pages != args.lo_images.size() || num_pages != args.ms_conv_images.size()) {
@@ -161,47 +188,26 @@ int main(int argc, char* argv[])
 
 		for (size_t i = 0; i < num_pages; i++)  {
 			BMP base = args.ms_orig_images[i];
-			BMP imported = args.lo_images[i];
-			BMP export_lo = args.ms_conv_images[i];
+			BMP lo = args.lo_images[i];
+			BMP ms_conv = args.ms_conv_images[i];
 
-			// Diffing the authoritative page with the imported page
 			std::string base_lo_diff_path = args.import_dir + "/" + args.basename + "_import-page-" + std::to_string(i + 1) + ".bmp";
-			BMP lo_diff = pixel_basher.compare_to_bmp(base, imported, args.enable_minor_differences);
-			lo_diff.write(base_lo_diff_path.c_str());
+			BMP lo_diff = diff_and_write(pixel_basher, base, lo, args.enable_minor_differences, base_lo_diff_path);
 
-			// Diffing the authoritative page with the exported page
 			std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
-			BMP ms_conv_diff = pixel_basher.compare_to_bmp(base, export_lo, args.enable_minor_differences);
-			ms_conv_diff.write(base_ms_conv_diff_path.c_str());
+			BMP ms_conv_diff = diff_and_write(pixel_basher, base, ms_conv, args.enable_minor_differences, base_ms_conv_diff_path);
 
 			if (args.lo_previous) {
-				BMP lo_previous = args.lo_previous_images[i];
-
-				std::string base_lo_previous_path = args.import_dir + "/"  + args.basename + "_prev-import-page-" + std::to_string(i + 1) + ".bmp";
-				BMP lo_previous_diff = pixel_basher.compare_to_bmp(base, lo_previous, args.enable_minor_differences);
-				lo_previous_diff.write(base_lo_previous_path.c_str());
-
-				std::string lo_previous_compare_path = args.import_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(i + 1) + ".bmp";
-				BMP lo_version_diff = pixel_basher.compare_regressions(base, lo_diff, lo_previous_diff);
-				lo_version_diff.write(lo_previous_compare_path.c_str());
+				compare_lo_previous(pixel_basher, base, lo_diff, args.lo_previous_images[i], i, args);
 			}
 
 			if (args.ms_previous) {
-				BMP ms_conv_previous = args.ms_conv_previous_images[i];
-
-				std::string base_ms_conv_previous_path = args.export_dir + "/"  + args.basename + "_prev-export-page-" + std::to_string(i + 1) + ".bmp";
-				BMP ms_conv_previous_diff = pixel_basher.compare_to_bmp(base, ms_conv_previous, args.enable_minor_differences);
-				ms_conv_previous_diff.write(base_ms_conv_previous_path.c_str());
-
-				std::string export_previous_compare_output_path = args.export_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(i + 1) + ".bmp";
-				BMP ms_conv_version_diff = pixel_basher.compare_regressions(base, ms_conv_diff, ms_conv_previous_diff);
-				ms_conv_version_diff.write(export_previous_compare_output_path.c_str());
+				compare_ms_previous(pixel_basher, base, ms_conv_diff, args.ms_conv_previous_images[i], i, args);
 			}
 
-			// Write stats to CSV
-			std::string csv_filename = "diff-pdf-" + args.extension;
-			write_stats_to_csv(base, imported, lo_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"));
-			write_stats_to_csv(base, export_lo, ms_conv_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"));
+
+			write_stats_to_csv(base, lo, lo_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"));
+			write_stats_to_csv(base, ms_conv, ms_conv_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"));
 		}
     } catch (const std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
