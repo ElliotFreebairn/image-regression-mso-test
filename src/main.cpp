@@ -170,10 +170,6 @@ void compare_ms_previous(PixelBasher& pixelbasher, BMP& base, BMP& ms_conv_diff,
 	version_diff.write(compare_path.c_str());
 }
 
-
-// Main function to compare two BMP images and generate a diff image
-// Usage: pixelbasher base.bmp input.bmp output.bmp [enable_minor_differences]
-// The last argument is optional and can be "true" or "false" to enable
 int main(int argc, char* argv[])
 {
 	try {
@@ -204,7 +200,6 @@ int main(int argc, char* argv[])
 			if (args.ms_previous) {
 				compare_ms_previous(pixel_basher, base, ms_conv_diff, args.ms_conv_previous_images[i], i, args);
 			}
-
 
 			write_stats_to_csv(base, lo, lo_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"));
 			write_stats_to_csv(base, ms_conv, ms_conv_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"));
