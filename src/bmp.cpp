@@ -42,13 +42,13 @@ void BMP::read(const char *filename)
 
 	if (!input)
 	{
-		throw std::runtime_error(std::string("Can't open BMP file: ") + filename);
+		throw std::runtime_error(std::string("Can't open the BMP file: ") + filename);
 	}
 
 	input.read((char *)&file_header, sizeof(file_header)); // read file header data into struct
 	if (file_header.file_type != 0x4D42)
 	{
-		throw std::runtime_error("Not a BMP file");
+		throw std::runtime_error("Not a BMP file, file header type has to be 'BM'");
 	}
 
 	input.read((char *)&info_header, sizeof(info_header)); // read info header data into struct
@@ -92,7 +92,7 @@ void BMP::write(const char *filename)
 	std::ofstream output{filename, std::ios_base::binary};
 	if (!output)
 	{
-		throw std::runtime_error("Cannot open file for writing");
+		throw std::runtime_error("Cannot open/create the file to write");
 	}
 
 	// write the headers
@@ -117,11 +117,12 @@ void BMP::write(const char *filename)
 	}
 }
 
-void BMP::write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *filename) {
+void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *filename)
+{
 	std::ofstream output{filename, std::ios_base::binary};
 	if (!output)
 	{
-		throw std::runtime_error("Cannot open file for writing");
+		throw std::runtime_error("Cannot open/create the file to write");
 	}
 
 	int height = diff.get_height();
@@ -135,41 +136,48 @@ void BMP::write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *file
 
 	std::vector<uint8_t> combined_data(alligned_stride * height, 0);
 
-	for (int y = 0; y < height; ++y) {
-		uint8_t* dest_row = &combined_data[y * alligned_stride];
+	for (int y = 0; y < height; ++y)
+	{
+		uint8_t *dest_row = &combined_data[y * alligned_stride];
 		size_t dest_col = 0;
 
 		int src_width = diff.get_width();
-		size_t src_row_stride = src_width  * bytes_per_pixel;
+		size_t src_row_stride = src_width * bytes_per_pixel;
 		const std::vector<uint8_t> &src_data = diff.get_data();
-		const uint8_t* src_row = &src_data[y * src_row_stride];
+		const uint8_t *src_row = &src_data[y * src_row_stride];
 
-		for (int x = 0; x < src_width; ++x) {
-			for (int b = 0; b < bytes_per_pixel; ++b) {
+		for (int x = 0; x < src_width; ++x)
+		{
+			for (int b = 0; b < bytes_per_pixel; ++b)
+			{
 				dest_row[dest_col * bytes_per_pixel + b] = src_row[x * bytes_per_pixel + b];
 			}
 			dest_col++;
 		}
 
 		src_width = base.get_width();
-		src_row_stride = src_width  * bytes_per_pixel;
+		src_row_stride = src_width * bytes_per_pixel;
 		const std::vector<uint8_t> &base_data = base.get_data();
-		const uint8_t* base_row = &base_data[y * src_row_stride];
+		const uint8_t *base_row = &base_data[y * src_row_stride];
 
-		for (int x = 0; x < src_width; ++x) {
-			for (int b = 0; b < bytes_per_pixel; ++b) {
+		for (int x = 0; x < src_width; ++x)
+		{
+			for (int b = 0; b < bytes_per_pixel; ++b)
+			{
 				dest_row[dest_col * bytes_per_pixel + b] = base_row[x * bytes_per_pixel + b];
 			}
 			dest_col++;
 		}
 
 		src_width = base.get_width();
-		src_row_stride = src_width  * bytes_per_pixel;
+		src_row_stride = src_width * bytes_per_pixel;
 		const std::vector<uint8_t> &target_data = target.get_data();
-		const uint8_t* target_row = &target_data[y * src_row_stride];
+		const uint8_t *target_row = &target_data[y * src_row_stride];
 
-		for (int x = 0; x < src_width; ++x) {
-			for (int b = 0; b < bytes_per_pixel; ++b) {
+		for (int x = 0; x < src_width; ++x)
+		{
+			for (int b = 0; b < bytes_per_pixel; ++b)
+			{
 				dest_row[dest_col * bytes_per_pixel + b] = target_row[x * bytes_per_pixel + b];
 			}
 			dest_col++;
@@ -198,7 +206,6 @@ void BMP::write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *file
 		}
 	}
 }
-
 
 int BMP::get_non_background_pixel_count(int background_value) const
 {
@@ -234,7 +241,8 @@ void BMP::set_data(std::vector<uint8_t> &new_data)
 {
 	if (new_data.size() != data.size())
 	{
-		throw std::runtime_error("New data size does not match existing data size");
+		throw std::runtime_error("New data size " + std::to_string(new_data.size()) +
+								 " differs to current data size " + std::to_string(data.size()));
 	}
 	data = new_data;
 }
