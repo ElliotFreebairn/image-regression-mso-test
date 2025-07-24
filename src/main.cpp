@@ -17,7 +17,8 @@
 #include "bmp.hpp"
 #include "pixelbasher.hpp"
 
-struct ParsedArguments {
+struct ParsedArguments
+{
 	std::string basename;
 	std::string extension;
 	std::string import_dir;
@@ -34,39 +35,45 @@ struct ParsedArguments {
 	bool ms_previous;
 };
 
-void write_stats_to_csv(const BMP& image1, const BMP& image2, const BMP& diff, int page_number, std::string basename,
-     std::string filename)
+void write_stats_to_csv(const BMP &image1, const BMP &image2, const BMP &diff, int page_number, std::string basename,
+						std::string filename)
 {
-  std::ofstream csv_file(filename);
-  if (!csv_file.is_open()) {
-    throw std::runtime_error("Cannot open CSV file for writing");
-  }
+	std::ofstream csv_file(filename);
+	if (!csv_file.is_open())
+	{
+		throw std::runtime_error("Cannot open CSV file for writing");
+	}
 
-  double image1_total_pixels = image1.get_width() * image1.get_height();
-  double image2_total_pixels = image2.get_width() * image2.get_height();
+	double image1_total_pixels = image1.get_width() * image1.get_height();
+	double image2_total_pixels = image2.get_width() * image2.get_height();
 
-  csv_file << basename << ","
-            << page_number << ","
-            << image1_total_pixels << "," // total pixels in auth
-            << image1.get_non_background_count() << "," // non-background pixels in auth
-            << (static_cast<double>(image1.get_non_background_count()) / image1_total_pixels) << ","
-            << image2_total_pixels << "," // total pixels in import
-            << image2.get_non_background_count() << "," // non-background pixels in import
-            << (static_cast<double>(image2.get_non_background_count()) / image2_total_pixels)<< ","
-            << diff.get_red_count() << "," // red pixels in diff
-            << (static_cast<double>(diff.get_red_count()) / image2_total_pixels) << "\n";
+	csv_file << basename << ","
+			 << page_number << ","
+			 << image1_total_pixels << ","
+			 << image1.get_non_background_count() << ","
+			 << (static_cast<double>(image1.get_non_background_count()) / image1_total_pixels) << ","
+			 << image2_total_pixels << ","
+			 << image2.get_non_background_count() << ","
+			 << (static_cast<double>(image2.get_non_background_count()) / image2_total_pixels) << ","
+			 << diff.get_red_count() << ","
+			 << (static_cast<double>(diff.get_red_count()) / image2_total_pixels) << "\n";
 }
 
-void parse_flag(int &arg_index, bool &option, std::string value, std::string option_name) {
-	if (value == "true" || value == "false") {
+void parse_flag(int &arg_index, bool &option, std::string value, std::string option_name)
+{
+	if (value == "true" || value == "false")
+	{
 		option = (value == "true");
 		arg_index--;
-	} else {
+	}
+	else
+	{
 		throw std::runtime_error("Incorrect usage for " + option_name + ": " + value + " should be true of flase");
 	}
 }
 
-void parse_flags(int& arg_index, char* argv[], ParsedArguments& args) {
+void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
+{
 	std::string minor_differences = argv[arg_index - 1];
 	parse_flag(arg_index, args.enable_minor_differences, minor_differences, "minor-differences");
 
@@ -77,25 +84,30 @@ void parse_flags(int& arg_index, char* argv[], ParsedArguments& args) {
 	parse_flag(arg_index, args.lo_previous, lo_previous, "lo_previous");
 }
 
-void parse_directories(int &arg_index, char *argv[], ParsedArguments& args) {
+void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
+{
 	args.export_compare_dir = argv[--arg_index];
 	args.import_compare_dir = argv[--arg_index];
 	args.export_dir = argv[--arg_index];
 	args.import_dir = argv[--arg_index];
 }
 
-void parse_image_group(char *argv[], int start, int pages, std::vector<BMP>& images, const std::string& basename) {
-	for (int i = 0; i < pages; i++) {
+void parse_image_group(char *argv[], int start, int pages, std::vector<BMP> &images, const std::string &basename)
+{
+	for (int i = 0; i < pages; i++)
+	{
 		images.push_back(BMP(argv[start + i], basename));
 	}
 }
 
-ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
-	if (argc < 10) {
+ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
+{
+	if (argc < 10)
+	{
 		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
-		"ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..."  +
-		"[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
-		"import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ [lo_previous] [ms_preivous] [enable_minor_differences]");
+								 "ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..." +
+								 "[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
+								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ [lo_previous] [ms_preivous] [enable_minor_differences]");
 	}
 
 	ParsedArguments args;
@@ -108,11 +120,14 @@ ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
 	size_t dot_pos = args.basename.find_last_of('.');
 	args.extension = (dot_pos != std::string::npos) ? args.basename.substr(dot_pos + 1) : "";
 
-	if (args.lo_previous) pdf_count++;
-	if (args.ms_previous) pdf_count++;
+	if (args.lo_previous)
+		pdf_count++;
+	if (args.ms_previous)
+		pdf_count++;
 
 	int num_image_args = arg_index - 2; // exclude program, basename
-	if (num_image_args % pdf_count != 0) {
+	if (num_image_args % pdf_count != 0)
+	{
 		throw std::runtime_error("Error: Mismatched number of authoritative and import pages.");
 	}
 
@@ -128,28 +143,31 @@ ParsedArguments parse_arguments(int argc, char* argv[], int pdf_count = 3) {
 	parse_image_group(argv, offset, num_pages, args.ms_conv_images, args.basename);
 	offset += num_pages;
 
-	if (args.lo_previous) {
+	if (args.lo_previous)
+	{
 		parse_image_group(argv, offset, num_pages, args.lo_previous_images, args.basename);
 		offset += num_pages;
 	}
 
-	if (args.ms_previous) {
+	if (args.ms_previous)
+	{
 		parse_image_group(argv, offset, num_pages, args.ms_conv_previous_images, args.basename);
 		offset += num_pages;
 	}
 	return args;
 }
 
-BMP diff_and_write(PixelBasher& pixel_basher, BMP& base, BMP& target, bool allow_minor_diffs, const std::string& output_path) {
+BMP diff_and_write(PixelBasher &pixel_basher, BMP &base, BMP &target, bool allow_minor_diffs, const std::string &output_path)
+{
 	BMP diff = pixel_basher.compare_to_bmp(base, target, allow_minor_diffs);
 	diff.write(output_path.c_str());
 	return diff;
 }
 
-void compare_lo_previous(PixelBasher& pixelbasher, BMP& base, BMP& lo_diff, BMP& lo_previous,
-						size_t page_index, const ParsedArguments& args)
+void compare_lo_previous(PixelBasher &pixelbasher, BMP &base, BMP &lo_diff, BMP &lo_previous,
+						 size_t page_index, const ParsedArguments &args)
 {
-	std::string lo_prev_diff_path = args.import_dir + "/"  + args.basename + "_prev-import-page-" + std::to_string(page_index + 1) + ".bmp";
+	std::string lo_prev_diff_path = args.import_dir + "/" + args.basename + "_prev-import-page-" + std::to_string(page_index + 1) + ".bmp";
 	BMP lo_prev_diff = pixelbasher.compare_to_bmp(base, lo_previous, args.enable_minor_differences);
 	lo_prev_diff.write(lo_prev_diff_path.c_str());
 
@@ -158,10 +176,10 @@ void compare_lo_previous(PixelBasher& pixelbasher, BMP& base, BMP& lo_diff, BMP&
 	lo_version_diff.write(compare_path.c_str());
 }
 
-void compare_ms_previous(PixelBasher& pixelbasher, BMP& base, BMP& ms_conv_diff, BMP& ms_conv_previous,
-						size_t page_index, const ParsedArguments& args)
+void compare_ms_previous(PixelBasher &pixelbasher, BMP &base, BMP &ms_conv_diff, BMP &ms_conv_previous,
+						 size_t page_index, const ParsedArguments &args)
 {
-	std::string prev_diff_path = args.export_dir + "/"  + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
+	std::string prev_diff_path = args.export_dir + "/" + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
 	BMP ms_prev_diff = pixelbasher.compare_to_bmp(base, ms_conv_previous, args.enable_minor_differences);
 	ms_prev_diff.write(prev_diff_path.c_str());
 
@@ -170,19 +188,22 @@ void compare_ms_previous(PixelBasher& pixelbasher, BMP& base, BMP& ms_conv_diff,
 	version_diff.write(compare_path.c_str());
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	try {
+	try
+	{
 		ParsedArguments args = parse_arguments(argc, argv);
 		PixelBasher pixel_basher;
 		const std::string csv_filename = "diff-pdf-" + args.extension;
 
 		size_t num_pages = args.ms_orig_images.size();
-		if (num_pages != args.lo_images.size() || num_pages != args.ms_conv_images.size()) {
+		if (num_pages != args.lo_images.size() || num_pages != args.ms_conv_images.size())
+		{
 			throw std::runtime_error("Error: Mismatched number of authoritative, import, and export pages.");
 		}
 
-		for (size_t i = 0; i < num_pages; i++)  {
+		for (size_t i = 0; i < num_pages; i++)
+		{
 			BMP base = args.ms_orig_images[i];
 			BMP lo = args.lo_images[i];
 			BMP ms_conv = args.ms_conv_images[i];
@@ -193,18 +214,22 @@ int main(int argc, char* argv[])
 			std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
 			BMP ms_conv_diff = diff_and_write(pixel_basher, base, ms_conv, args.enable_minor_differences, base_ms_conv_diff_path);
 
-			if (args.lo_previous) {
+			if (args.lo_previous)
+			{
 				compare_lo_previous(pixel_basher, base, lo_diff, args.lo_previous_images[i], i, args);
 			}
 
-			if (args.ms_previous) {
+			if (args.ms_previous)
+			{
 				compare_ms_previous(pixel_basher, base, ms_conv_diff, args.ms_conv_previous_images[i], i, args);
 			}
 
 			write_stats_to_csv(base, lo, lo_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"));
 			write_stats_to_csv(base, ms_conv, ms_conv_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"));
 		}
-    } catch (const std::exception& e) {
+	}
+	catch (const std::exception &e)
+	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		return 1;
 	}
