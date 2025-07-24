@@ -25,12 +25,14 @@ struct ParsedArguments
 	std::string export_dir;
 	std::string import_compare_dir;
 	std::string export_compare_dir;
+	std::string image_dump_dir;
 	std::vector<BMP> ms_orig_images;
 	std::vector<BMP> lo_images;
 	std::vector<BMP> ms_conv_images;
 	std::vector<BMP> lo_previous_images;
 	std::vector<BMP> ms_conv_previous_images;
 	bool enable_minor_differences;
+	bool image_dump;
 	bool lo_previous;
 	bool ms_previous;
 };
@@ -77,6 +79,9 @@ void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 	std::string minor_differences = argv[arg_index - 1];
 	parse_flag(arg_index, args.enable_minor_differences, minor_differences, "minor-differences");
 
+	std::string image_dump = argv[arg_index - 1];
+	parse_flag(arg_index, args.image_dump, image_dump, "image_dump");
+
 	std::string ms_previous = argv[arg_index - 1];
 	parse_flag(arg_index, args.ms_previous, ms_previous, "ms_previous");
 
@@ -86,6 +91,7 @@ void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 
 void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
 {
+	args.image_dump_dir = argv[--arg_index];
 	args.export_compare_dir = argv[--arg_index];
 	args.import_compare_dir = argv[--arg_index];
 	args.export_dir = argv[--arg_index];
@@ -107,7 +113,7 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
 								 "ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..." +
 								 "[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
-								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ [lo_previous] [ms_preivous] [enable_minor_differences]");
+								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ image-dump_dur/ [lo_previous] [ms_preivous] [image_dump] [enable_minor_differences]");
 	}
 
 	ParsedArguments args;
@@ -210,9 +216,17 @@ int main(int argc, char *argv[])
 
 			std::string base_lo_diff_path = args.import_dir + "/" + args.basename + "_import-page-" + std::to_string(i + 1) + ".bmp";
 			BMP lo_diff = diff_and_write(pixel_basher, base, lo, args.enable_minor_differences, base_lo_diff_path);
+			if (args.image_dump) {
+				std::string side_by_side_path = args.image_dump_dir + "/lo_comparison-page-" + std::to_string(i + 1) + ".bmp";
+				BMP::write_side_by_side(lo_diff, base, lo, side_by_side_path.c_str());
+			}
 
 			std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
 			BMP ms_conv_diff = diff_and_write(pixel_basher, base, ms_conv, args.enable_minor_differences, base_ms_conv_diff_path);
+			if (args.image_dump) {
+				std::string side_by_side_path = args.image_dump_dir + "/ms_conv_comparison-page-" + std::to_string(i + 1) + ".bmp";
+				BMP::write_side_by_side(ms_conv_diff, base, ms_conv, side_by_side_path.c_str());
+			}
 
 			if (args.lo_previous)
 			{

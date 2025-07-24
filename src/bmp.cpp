@@ -117,6 +117,89 @@ void BMP::write(const char *filename)
 	}
 }
 
+void BMP::write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *filename) {
+	std::ofstream output{filename, std::ios_base::binary};
+	if (!output)
+	{
+		throw std::runtime_error("Cannot open file for writing");
+	}
+
+	int height = diff.get_height();
+	int bit_count = diff.get_info_header().bit_count;
+	int bytes_per_pixel = bit_count / 8;
+
+	int combined_width = diff.get_width() + base.get_width() + target.get_width();
+	size_t row_stride = combined_width * bytes_per_pixel;
+	size_t alligned_stride = (row_stride + 3) & ~3; // rounds down to the nearest 4 (4 bytes per pixel in a 32-bit RGBA BMP)
+	size_t padding_size = alligned_stride - row_stride;
+
+	std::vector<uint8_t> combined_data(alligned_stride * height, 0);
+
+	for (int y = 0; y < height; ++y) {
+		uint8_t* dest_row = &combined_data[y * alligned_stride];
+		size_t dest_col = 0;
+
+		int src_width = diff.get_width();
+		size_t src_row_stride = src_width  * bytes_per_pixel;
+		const std::vector<uint8_t> &src_data = diff.get_data();
+		const uint8_t* src_row = &src_data[y * src_row_stride];
+
+		for (int x = 0; x < src_width; ++x) {
+			for (int b = 0; b < bytes_per_pixel; ++b) {
+				dest_row[dest_col * bytes_per_pixel + b] = src_row[x * bytes_per_pixel + b];
+			}
+			dest_col++;
+		}
+
+		src_width = base.get_width();
+		src_row_stride = src_width  * bytes_per_pixel;
+		const std::vector<uint8_t> &base_data = base.get_data();
+		const uint8_t* base_row = &base_data[y * src_row_stride];
+
+		for (int x = 0; x < src_width; ++x) {
+			for (int b = 0; b < bytes_per_pixel; ++b) {
+				dest_row[dest_col * bytes_per_pixel + b] = base_row[x * bytes_per_pixel + b];
+			}
+			dest_col++;
+		}
+
+		src_width = base.get_width();
+		src_row_stride = src_width  * bytes_per_pixel;
+		const std::vector<uint8_t> &target_data = target.get_data();
+		const uint8_t* target_row = &target_data[y * src_row_stride];
+
+		for (int x = 0; x < src_width; ++x) {
+			for (int b = 0; b < bytes_per_pixel; ++b) {
+				dest_row[dest_col * bytes_per_pixel + b] = target_row[x * bytes_per_pixel + b];
+			}
+			dest_col++;
+		}
+	}
+
+	BMPFileHeader file_header = diff.get_file_header();
+	BMPInfoHeader info_header = diff.get_info_header();
+	BMPColourHeader colour_header = diff.get_colour_header();
+	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
+
+	info_header.width = combined_width;
+	file_header.file_size = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader) + image_size;
+
+	output.write((const char *)&file_header, sizeof(BMPFileHeader));
+	output.write((const char *)&info_header, sizeof(BMPInfoHeader));
+	output.write((const char *)&colour_header, sizeof(BMPColourHeader));
+
+	std::vector<uint8_t> padding(padding_size, 0);
+	for (int y = 0; y < info_header.height; y++)
+	{
+		output.write((const char *)(combined_data.data() + y * row_stride), row_stride);
+		if (padding_size > 0)
+		{
+			output.write((const char *)padding.data(), padding_size);
+		}
+	}
+}
+
+
 int BMP::get_non_background_pixel_count(int background_value) const
 {
 	int non_background_count = 0;
