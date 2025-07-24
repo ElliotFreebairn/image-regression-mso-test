@@ -124,7 +124,7 @@ std::vector<uint8_t> PixelBasher::compare_versions(Pixel &current_pixel, Pixel &
 	{
 		return colour_pixel(Colour::GREEN); // a fix
 	}
-	return base.get_vector();
+	return base.to_vector();
 }
 
 std::vector<uint8_t> PixelBasher::compare_pixels(Pixel &base, Pixel &target, BMP &diff, bool near_edge, bool minor_differences)
@@ -132,7 +132,7 @@ std::vector<uint8_t> PixelBasher::compare_pixels(Pixel &base, Pixel &target, BMP
 	bool colour_differs = base.differs_from(target, near_edge);
 
 	if (!colour_differs || (near_edge && !minor_differences))
-		return base.get_vector();
+		return base.to_vector();
 
 	if (near_edge && minor_differences)
 	{
@@ -161,6 +161,6 @@ std::vector<uint8_t> PixelBasher::colour_pixel(Colour colour)
 		return {0, 255, 0, 255};
 		break;
 	default:
-		throw std::runtime_error("Invalid colour enum passed");
+		throw std::runtime_error("Invalid colour enum passed " + colour);
 	}
 }

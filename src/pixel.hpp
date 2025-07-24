@@ -14,8 +14,6 @@
 #include <iostream>
 #include <vector>
 
-// Pixel structure to represent a pixel in an image
-// It contains RGBA values and methods to compare pixels and convert to string
 struct Pixel
 {
 	uint8_t blue{0};
@@ -27,6 +25,11 @@ struct Pixel
 	static Pixel get_pixel(const std::vector<uint8_t> &data, int index)
 	{
 		return Pixel{data[index], data[index + 1], data[index + 2], data[index + 3]};
+	}
+
+	std::vector<uint8_t> to_vector()
+	{
+		return {blue, green, red, alpha};
 	}
 
 	std::string to_string() const
@@ -54,11 +57,6 @@ struct Pixel
 	bool is_red()
 	{
 		return (blue == 0 && green == 0 && red == 255);
-	}
-
-	std::vector<uint8_t> get_vector()
-	{
-		return {blue, green, red, alpha};
 	}
 };
 #endif

@@ -113,7 +113,8 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
 								 "ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..." +
 								 "[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
-								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ image-dump_dur/ [lo_previous] [ms_preivous] [image_dump] [enable_minor_differences]");
+								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ image-dump_dir/" +
+								 "[lo_previous] [ms_preivous] [image_dump] [enable_minor_differences]");
 	}
 
 	ParsedArguments args;
@@ -134,7 +135,7 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 	int num_image_args = arg_index - 2; // exclude program, basename
 	if (num_image_args % pdf_count != 0)
 	{
-		throw std::runtime_error("Error: Mismatched number of authoritative and import pages.");
+		throw std::runtime_error("Error: " + std::to_string(pdf_count) + " files cannot have a total of " + std::to_string(num_image_args) + " pages.");
 	}
 
 	int num_pages = num_image_args / pdf_count;
@@ -205,7 +206,7 @@ int main(int argc, char *argv[])
 		size_t num_pages = args.ms_orig_images.size();
 		if (num_pages != args.lo_images.size() || num_pages != args.ms_conv_images.size())
 		{
-			throw std::runtime_error("Error: Mismatched number of authoritative, import, and export pages.");
+			throw std::runtime_error("Error: mismatched number of pages (" + std::to_string(num_pages) + ") between MS_ORIG, LO, MS_CONV and/or LO_PREVIOUS, MS_CONV_PREVIOUS");
 		}
 
 		for (size_t i = 0; i < num_pages; i++)
@@ -216,14 +217,16 @@ int main(int argc, char *argv[])
 
 			std::string base_lo_diff_path = args.import_dir + "/" + args.basename + "_import-page-" + std::to_string(i + 1) + ".bmp";
 			BMP lo_diff = diff_and_write(pixel_basher, base, lo, args.enable_minor_differences, base_lo_diff_path);
-			if (args.image_dump) {
+			if (args.image_dump)
+			{
 				std::string side_by_side_path = args.image_dump_dir + "/lo_comparison-page-" + std::to_string(i + 1) + ".bmp";
 				BMP::write_side_by_side(lo_diff, base, lo, side_by_side_path.c_str());
 			}
 
 			std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
 			BMP ms_conv_diff = diff_and_write(pixel_basher, base, ms_conv, args.enable_minor_differences, base_ms_conv_diff_path);
-			if (args.image_dump) {
+			if (args.image_dump)
+			{
 				std::string side_by_side_path = args.image_dump_dir + "/ms_conv_comparison-page-" + std::to_string(i + 1) + ".bmp";
 				BMP::write_side_by_side(ms_conv_diff, base, ms_conv, side_by_side_path.c_str());
 			}
