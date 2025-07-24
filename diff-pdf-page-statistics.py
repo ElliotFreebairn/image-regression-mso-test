@@ -1084,6 +1084,8 @@ def main():
         IMAGE_DUMP_DIR = os.path.join(base_dir, "converted", "image-dump", file_ext[0])
         if not os.path.isdir(IMAGE_DUMP_DIR):
             os.makedirs(IMAGE_DUMP_DIR)
+    else:
+        IMAGE_DUMP_DIR = ""
 
     # ---------------------------------------------------------------------------- Where image magick starts
 
@@ -1100,8 +1102,9 @@ def main():
     # Convert the MSO PDF to bmp's
     subprocess.run([
         "magick",
+        "-density", str(args.resolution),
         MS_ORIG,
-        "-density", args.resolution,
+        "-resize", "75%",
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-background", "white",
@@ -1113,8 +1116,9 @@ def main():
     # Convert the LO PDF to bmp's
     subprocess.run([
         "magick",
+        "-density", str(args.resolution),
         LO_ORIG,
-        "-density", args.resolution,
+        "-resize", "75%",
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-background", "white",
@@ -1126,8 +1130,9 @@ def main():
     # Convert the MSO Roundtripped PDF's to BMP's
     subprocess.run([
         "magick",
+        "-density", str(args.resolution),
         MS_CONV,
-        "-density", args.resolution,
+        "-resize", "75%",
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-background", "white",
@@ -1140,9 +1145,9 @@ def main():
     if IS_FILE_LO_PREV:
         subprocess.run([
             "magick",
+            "-density", str(args.resolution),
             LO_PREV,
-            "-density",
-            args.resolution,
+            "-resize", "75%",
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
             "-background", "white",
@@ -1155,9 +1160,9 @@ def main():
     if IS_FILE_MS_PREV:
         subprocess.run([
             "magick",
+            "-density", str(args.resolution),
             MS_PREV,
-            "-density",
-            args.resolution,
+            "-resize", "75%",
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
             "-background", "white",
@@ -1183,7 +1188,7 @@ def main():
     if IS_FILE_MS_PREV:
         ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import_mso*.bmp")))
 
-    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.minor_differences)]
+    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.minor_differences).lower()]
 
     # Run pixelbasher to compare differnces between MSO and LO PDF pages
     subprocess.run(
@@ -1198,6 +1203,7 @@ def main():
         [EXPORT_DIR] +
         [IMPORT_COMPARE_DIR] +
         [EXPORT_COMPARE_DIR] +
+        [IMAGE_DUMP_DIR] +
         options,
         #["false", str(args.minor_differences)], # options: 1st: diff mso_roundtrip files, 2nd: minor differences
         check=True

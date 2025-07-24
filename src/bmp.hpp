@@ -62,6 +62,8 @@ public:
 	void read(const char *filename);
 	void write(const char *filename);
 
+	static void write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *filename);
+
 	const BMPFileHeader &get_file_header() { return file_header; }
 	const BMPInfoHeader &get_info_header() { return info_header; }
 	const BMPColourHeader &get_colour_header() { return colour_header; }
