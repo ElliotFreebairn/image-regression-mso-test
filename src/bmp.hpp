@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <vector>
 #include <iostream>
+#include <array>
 
 #pragma pack(push, 1)
 struct BMPFileHeader {
@@ -62,6 +63,7 @@ public:
   const BMPColourHeader& get_colour_header() { return colour_header; }
 
   const std::vector<uint8_t>& get_data() const { return data; }
+  const std::vector<bool>& get_blurred_edge_mask() const { return blurred_edge_mask; }
 
   int get_width() const { return info_header.width; }
   int get_height() const { return info_header.height; }
@@ -79,10 +81,16 @@ private:
   int get_average_colour() const;
   int get_non_background_pixel_count(int background_value) const;
 
+  std::vector<bool> sobel_edges(const BMP &image, int threshold = 40);
+  std::vector<bool> blur_edge_mask(const BMP &image, const std::vector<bool> &edge_map, int radius = 2);
+  std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<uint8_t>& data, int width, int pixel_stride);
+  void blur_pixels(int x, int y, int radius, int width, int height, std::vector<bool>& mask);
+
   BMPFileHeader file_header;
   BMPInfoHeader info_header;
   BMPColourHeader colour_header;
   std::vector<uint8_t> data;
+  std::vector<bool> blurred_edge_mask;
 
   int red_count = 0;
   int yellow_count = 0;

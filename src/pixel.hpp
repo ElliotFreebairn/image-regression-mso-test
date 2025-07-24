@@ -49,5 +49,9 @@ struct Pixel {
   bool is_red() {
     return (blue == 0 && green == 0 && red == 255);
   }
+
+  std::vector<uint8_t> get_vector() {
+    return {blue, green, red, alpha};
+  }
 };
 #endif

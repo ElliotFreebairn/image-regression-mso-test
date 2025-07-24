@@ -15,29 +15,28 @@
 #include <array>
 
 #include "bmp.hpp"
+#include "pixel.hpp"
 
 // PixelBasher class to handle the comparison of BMP images and generate diff images
-class PixelBasher {
+class PixelBasher
+{
 public:
-  enum Colour {
+  enum Colour
+  {
     RED,
     YELLOW,
     BLUE,
     GREEN
   };
-
-  // Sobel edge detection algorithm to find edges in the BMP image
-  std::vector<bool> sobel_edges(BMP& image, int threshold = 40);
-
-  // Applies a blur effect to the edges found by the Sobel algorithm by a given radius
-  std::vector<bool> blur_edge_mask(const BMP& image, const std::vector<bool>& edge_map);
-
   // Compares two BMP images and generates a diff image based on the differences (the diff is applied to the base image)
-  BMP compare_to_bmp(BMP& original, BMP& target, bool enable_minor_differences);
+  BMP compare_to_bmp(BMP &original, BMP &target, bool enable_minor_differences);
+  BMP compare_regressions(BMP &original, BMP &current, BMP &previous);
 
-  BMP compare_regressions(BMP& original, BMP& current, BMP& previous);
+private:
+  std::vector<bool> get_intersection_mask(BMP &original, BMP &target, int min_width, int min_height);
 
-  // Generates a rgba pixel from a Colour enum
-  std::array<uint8_t, 4> colour_pixel(Colour colour);
+  std::vector<uint8_t> compare_versions(Pixel& current_pixel, Pixel& previous_pixel, Pixel& base);
+  std::vector<uint8_t> compare_pixels(Pixel& base, Pixel& target, BMP &diff, bool near_edge, bool minor_differences);
+  std::vector<uint8_t> colour_pixel(Colour colour);
 };
 #endif
