@@ -80,10 +80,14 @@ private:
 	int get_average_colour() const;
 	int get_non_background_pixel_count(int background_value) const;
 
-	std::vector<bool> sobel_edges(const BMP &image, int threshold = 40);
-	std::vector<bool> blur_edge_mask(const BMP &image, const std::vector<bool> &edge_map, int radius = 2);
-	std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<uint8_t> &data, int width, int pixel_stride);
-	void blur_pixels(int x, int y, int radius, int width, int height, std::vector<bool> &mask);
+	template<int Threshold>
+	std::vector<bool> sobel_edges();
+	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<uint8_t> &data, int width, int pixel_stride);
+
+	std::vector<bool> blur_edge_mask(const std::vector<bool> &edge_map);
+
+	template<int Radius> // compile-time constant
+	static void blur_pixels(int x, int y, int width, int height, std::vector<bool> &mask);
 
 	BMPFileHeader file_header;
 	BMPInfoHeader info_header;

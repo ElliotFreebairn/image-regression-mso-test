@@ -19,8 +19,7 @@ BMP::BMP(const char *filename, std::string basename)
 	background_value = get_average_colour();
 	non_background_count = get_non_background_pixel_count(background_value);
 
-	std::vector<bool> edge_mask = sobel_edges(*this);
-	this->blurred_edge_mask = blur_edge_mask(*this, edge_mask);
+	this->blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
 }
 
 BMP::BMP(const BMP &other)
@@ -247,10 +246,10 @@ void BMP::set_data(std::vector<uint8_t> &new_data)
 	data = new_data;
 }
 
-std::vector<bool> BMP::blur_edge_mask(const BMP &image, const std::vector<bool> &edge_map, int radius)
+std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 {
-	int32_t width = image.get_width();
-	int32_t height = image.get_height();
+	int32_t width = this->get_width();
+	int32_t height = this->get_height();
 	std::vector<bool> blurred_mask(width * height, false);
 
 	for (int y = 1; y < height - 1; y++)
@@ -263,17 +262,18 @@ std::vector<bool> BMP::blur_edge_mask(const BMP &image, const std::vector<bool> 
 			if (!edge_map[index])
 				continue;
 
-			blur_pixels(x, y, radius, width, height, blurred_mask);
+			blur_pixels<3>(x, y, width, height, blurred_mask);
 		}
 	}
 	return blurred_mask;
 }
 
-std::vector<bool> BMP::sobel_edges(const BMP &image, int threshold)
+template<int Threshold> // compile-time constant
+std::vector<bool> BMP::sobel_edges()
 {
-	int32_t width = image.get_width();
-	int32_t height = image.get_height();
-	const std::vector<uint8_t> &data = image.get_data();
+	int32_t width = this->get_width();
+	int32_t height = this->get_height();
+	const std::vector<uint8_t> &data = this->get_data();
 	int32_t pixel_stride = 4;
 
 	std::vector<bool> result(width * height, false);
@@ -290,17 +290,18 @@ std::vector<bool> BMP::sobel_edges(const BMP &image, int threshold)
 			// Calculate gradient magnitude (clamped to 255)
 			int magnitude = std::min(255, static_cast<int>(std::sqrt(g_x * g_x + g_y * g_y)));
 
-			result[y * width + x] = (magnitude >= threshold);
+			result[y * width + x] = (magnitude >= Threshold);
 		}
 	}
 	return result;
 }
 
-void BMP::blur_pixels(int x, int y, int radius, int width, int height, std::vector<bool> &mask)
+template<int Radius> // compile-time constant
+void BMP::blur_pixels(int x, int y, int width, int height, std::vector<bool> &mask)
 {
-	for (int dy = -radius; dy <= radius; dy++)
+	for (int dy = -Radius; dy <= Radius; dy++)
 	{
-		for (int dx = -radius; dx <= radius; dx++)
+		for (int dx = -Radius; dx <= Radius; dx++)
 		{
 			int new_x = x + dx;
 			int new_y = y + dy;
