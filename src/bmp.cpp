@@ -126,7 +126,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *file
 	}
 
 	int height = diff.get_height();
-	int bit_count = diff.get_info_header().bit_count;
+	int bit_count = diff.info_header.bit_count;
 	int bytes_per_pixel = bit_count / 8;
 
 	int combined_width = diff.get_width() + base.get_width() + target.get_width();
@@ -184,9 +184,9 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *file
 		}
 	}
 
-	BMPFileHeader file_header = diff.get_file_header();
-	BMPInfoHeader info_header = diff.get_info_header();
-	BMPColourHeader colour_header = diff.get_colour_header();
+	BMPFileHeader file_header = diff.file_header;
+	BMPInfoHeader info_header = diff.info_header;
+	BMPColourHeader colour_header = diff.colour_header;
 	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 
 	info_header.width = combined_width;
