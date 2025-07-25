@@ -69,18 +69,13 @@ void BMP::read(const char *filename)
 	uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
 	size_t padding_size = alligned_stride - row_stride;
 
-	std::vector<uint8_t> padding(padding_size);
 	m_data.resize(row_stride * m_info_header.height);
 
 	// read the pixel data row by row, and handle the padding if its necessary
 	for (int y = 0; y < m_info_header.height; y++)
 	{
 		input.read(reinterpret_cast<char *>(m_data.data() + y * row_stride), row_stride);
-
-		if (padding_size > 0)
-		{
-			input.read(reinterpret_cast<char *>(padding.data()), padding_size); // read in the padding so next read is correct
-		}
+		input.seekg(padding_size, input.cur);
 	}
 	m_file_header.file_size += m_data.size() + padding_size * m_info_header.height;
 }
