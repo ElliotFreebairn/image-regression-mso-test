@@ -11,8 +11,8 @@
 #ifndef PIXELBASHER_HPP
 #define PIXELBASHER_HPP
 
-#include <vector>
 #include <array>
+#include <vector>
 
 #include "bmp.hpp"
 #include "pixel.hpp"
