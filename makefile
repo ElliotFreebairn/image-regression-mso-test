@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -g
+CXXFLAGS = -std=c++17 -Wall -g -MMD -MP
 SRC_DIR = src
 OBJ_DIR = obj
 TARGET = pixelbasher
@@ -14,6 +14,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+-include $(OBJS:.o=.d)
+
 clean:
 	rm -f $(OBJ_DIR)/*.o $(TARGET)
-
