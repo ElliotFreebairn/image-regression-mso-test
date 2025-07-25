@@ -57,7 +57,6 @@ class BMP
 {
 public:
 	BMP(const char *filename, std::string basename);
-	BMP(const BMP &other);
 
 	void read(const char *filename);
 	void write(const char *filename);
