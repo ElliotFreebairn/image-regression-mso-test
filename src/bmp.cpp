@@ -18,8 +18,7 @@ BMP::BMP(const char *filename, std::string basename)
 	read(filename);
 	m_background_value = get_average_colour();
 	m_non_background_count = get_non_background_pixel_count(m_background_value);
-
-	this->m_blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
+	m_blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
 }
 
 BMP::BMP(const BMP &other)
@@ -248,8 +247,8 @@ void BMP::set_data(std::vector<uint8_t> &new_data)
 
 std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 {
-	int32_t width = this->get_width();
-	int32_t height = this->get_height();
+	int32_t width = m_info_header.width;
+	int32_t height = m_info_header.height;
 	std::vector<bool> blurred_mask(width * height, false);
 
 	for (int y = 1; y < height - 1; y++)
@@ -271,9 +270,9 @@ std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 template<int Threshold> // compile-time constant
 std::vector<bool> BMP::sobel_edges()
 {
-	int32_t width = this->get_width();
-	int32_t height = this->get_height();
-	const std::vector<uint8_t> &data = this->get_data();
+	int32_t width = m_info_header.width;
+	int32_t height = m_info_header.height;
+	const std::vector<uint8_t> &data = m_data;
 	int32_t pixel_stride = 4;
 
 	std::vector<bool> result(width * height, false);
