@@ -8,11 +8,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
-#include "pixelbasher.hpp"
 #include "pixel.hpp"
+#include "pixelbasher.hpp"
 
 BMP PixelBasher::compare_to_bmp(BMP &original, BMP &target, bool enable_minor_differences)
 {

@@ -8,10 +8,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <iostream>
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "bmp.hpp"
@@ -186,7 +186,7 @@ void compare_lo_previous(PixelBasher &pixelbasher, BMP &base, BMP &lo_diff, BMP 
 void compare_ms_previous(PixelBasher &pixelbasher, BMP &base, BMP &ms_conv_diff, BMP &ms_conv_previous,
 						 size_t page_index, const ParsedArguments &args)
 {
-	std::string prev_diff_path = args.export_dir + "/" + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
+    std::string prev_diff_path = args.export_dir + "/" + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
 	BMP ms_prev_diff = pixelbasher.compare_to_bmp(base, ms_conv_previous, args.enable_minor_differences);
 	ms_prev_diff.write(prev_diff_path.c_str());
 
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 {
 	try
 	{
-		ParsedArguments args = parse_arguments(argc, argv);
+        ParsedArguments args = parse_arguments(argc, argv);
 		PixelBasher pixel_basher;
 		const std::string csv_filename = "diff-pdf-" + args.extension;
 

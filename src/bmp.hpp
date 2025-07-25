@@ -11,11 +11,11 @@
 #ifndef BMP_HPP
 #define BMP_HPP
 
-#include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <iostream>
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <vector>
 
 #pragma pack(push, 1)
 struct BMPFileHeader
