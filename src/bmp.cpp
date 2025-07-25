@@ -13,6 +13,26 @@
 
 #include "bmp.hpp"
 
+struct BMPColourHeader
+{
+    uint32_t red_mask;
+    uint32_t green_mask;
+    uint32_t blue_mask;
+    uint32_t alpha_mask;
+    uint32_t colour_space;
+    uint32_t unused[16]{0};
+};
+
+static BMPColourHeader colour_header = {
+    0x00ff0000,
+    0x0000ff00,
+    0x000000ff,
+    0xff000000,
+    0x73524742,
+    {0}
+};
+
+
 BMP::BMP(const char *filename, std::string basename)
 {
 	read(filename);
@@ -73,7 +93,7 @@ void BMP::write(const char *filename)
 	// write the headers
 	output.write(reinterpret_cast<char *>(&m_file_header), sizeof(m_file_header));
 	output.write(reinterpret_cast<char *>(&m_info_header), sizeof(m_info_header));
-	output.write(reinterpret_cast<char *>(&m_colour_header), sizeof(m_colour_header));
+	output.write(reinterpret_cast<char *>(&colour_header), sizeof(colour_header));
 
 	size_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
 	size_t alligned_stride = (row_stride + 3) & ~3;
@@ -161,7 +181,7 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 
 	BMPFileHeader file_header = diff.m_file_header;
 	BMPInfoHeader info_header = diff.m_info_header;
-	BMPColourHeader colour_header = diff.m_colour_header;
+	BMPColourHeader colour_header = colour_header;
 
 	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 	info_header.width = combined_width;

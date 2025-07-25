@@ -20,36 +20,26 @@
 #pragma pack(push, 1)
 struct BMPFileHeader
 {
-	uint16_t file_type{0x4D42}; // BM
-	uint32_t file_size{0};
-	uint16_t placeholder_1{0};
-	uint16_t placeholder_2{0};
-	uint32_t offset_data{0}; // this is the start position of pixel data (bytes)
+	uint16_t file_type; // BM
+	uint32_t file_size;
+	uint16_t placeholder_1;
+	uint16_t placeholder_2;
+	uint32_t offset_data; // this is the start position of pixel data (bytes)
 };
 
 struct BMPInfoHeader
 {
-	uint32_t size{0};  // Size of the header (bytes)
-	int32_t width{0};  // in pixels
-	int32_t height{0}; // in pixels
-	uint16_t planes{1};
-	uint16_t bit_count{0}; // useful to check if file is RGBA or RGB
-	uint32_t compression{0};
-	uint32_t size_image{0};
-	int32_t x_per_meter{0};
-	int32_t y_per_meter{0};
-	uint32_t colours_used{0};
-	uint32_t colours_important{0};
-};
-
-struct BMPColourHeader
-{
-	uint32_t red_mask{0x00ff0000};
-	uint32_t green_mask{0x0000ff00};
-	uint32_t blue_mask{0x000000ff};
-	uint32_t alpha_mask{0xff000000};
-	uint32_t colour_space{0x73524742}; // sRGB
-	uint32_t unused[16]{0};
+	uint32_t size;  // Size of the header (bytes)
+	int32_t width;  // in pixels
+	int32_t height; // in pixels
+	uint16_t planes;
+	uint16_t bit_count; // useful to check if file is RGBA or RGB
+	uint32_t compression;
+	uint32_t size_image;
+	int32_t x_per_meter;
+	int32_t y_per_meter;
+	uint32_t colours_used;
+	uint32_t colours_important;
 };
 #pragma pack(pop)
 
@@ -90,7 +80,7 @@ private:
 
 	BMPFileHeader m_file_header;
 	BMPInfoHeader m_info_header;
-	BMPColourHeader m_colour_header;
+
 	std::vector<uint8_t> m_data;
 	std::vector<bool> m_blurred_edge_mask;
 	int m_red_count = 0;
