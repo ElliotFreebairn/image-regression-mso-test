@@ -48,10 +48,6 @@ void BMP::read(const char *filename)
 
 	input.seekg(m_file_header.offset_data, input.beg);
 
-	m_info_header.size = sizeof(BMPInfoHeader) + sizeof(BMPColourHeader); // we know that its a 32-bit BMP
-	m_file_header.offset_data = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader);
-	m_file_header.file_size = m_file_header.offset_data;
-
 	int32_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
 	uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
 	size_t padding_size = alligned_stride - row_stride;
@@ -64,7 +60,6 @@ void BMP::read(const char *filename)
 		input.read(reinterpret_cast<char *>(m_data.data() + y * row_stride), row_stride);
 		input.seekg(padding_size, input.cur);
 	}
-	m_file_header.file_size += m_data.size() + padding_size * m_info_header.height;
 }
 
 void BMP::write(const char *filename)
@@ -167,8 +162,8 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 	BMPFileHeader file_header = diff.m_file_header;
 	BMPInfoHeader info_header = diff.m_info_header;
 	BMPColourHeader colour_header = diff.m_colour_header;
-	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 
+	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 	info_header.width = combined_width;
 	file_header.file_size = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader) + image_size;
 
