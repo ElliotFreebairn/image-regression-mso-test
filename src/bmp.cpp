@@ -277,9 +277,7 @@ std::vector<bool> BMP::sobel_edges()
 	{
 		for (int x = 1; x < width - 1; x++)
 		{
-			std::array<int, 2> gradients = get_sobel_gradients(y, x, data, width, pixel_stride);
-			int g_x = gradients[0];
-			int g_y = gradients[1];
+			auto [g_x, g_y] = get_sobel_gradients(y, x, data, width, pixel_stride);
 
 			// Calculate gradient magnitude (clamped to 255)
 			int magnitude = std::min(255, static_cast<int>(std::sqrt(g_x * g_x + g_y * g_y)));
