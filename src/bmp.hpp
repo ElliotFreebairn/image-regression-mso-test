@@ -63,17 +63,17 @@ public:
 	void write(const char *filename);
 	static void write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *filename);
 
-	const std::vector<uint8_t> &get_data() const { return data; }
-	const std::vector<bool> &get_blurred_edge_mask() const { return blurred_edge_mask; }
-	int get_width() const { return info_header.width; }
-	int get_height() const { return info_header.height; }
-	int get_red_count() const { return red_count; }
-	int get_yellow_count() const { return yellow_count; }
-	int get_background_value() const { return background_value; }
-	int get_non_background_count() const { return non_background_count; }
+	const std::vector<uint8_t> &get_data() const { return m_data; }
+	const std::vector<bool> &get_blurred_edge_mask() const { return m_blurred_edge_mask; }
+	int get_width() const { return m_info_header.width; }
+	int get_height() const { return m_info_header.height; }
+	int get_red_count() const { return m_red_count; }
+	int get_yellow_count() const { return m_yellow_count; }
+	int get_background_value() const { return m_background_value; }
+	int get_non_background_count() const { return m_non_background_count; }
 
-	void increment_red_count(int new_red) { red_count += new_red; }
-	void increment_yellow_count(int new_yellow) { yellow_count += new_yellow; }
+	void increment_red_count(int new_red) { m_red_count += new_red; }
+	void increment_yellow_count(int new_yellow) { m_yellow_count += new_yellow; }
 	void set_data(std::vector<uint8_t> &new_data);
 
 private:
@@ -89,15 +89,14 @@ private:
 	template<int Radius> // compile-time constant
 	static void blur_pixels(int x, int y, int width, int height, std::vector<bool> &mask);
 
-	BMPFileHeader file_header;
-	BMPInfoHeader info_header;
-	BMPColourHeader colour_header;
-	std::vector<uint8_t> data;
-	std::vector<bool> blurred_edge_mask;
-
-	int red_count = 0;
-	int yellow_count = 0;
-	int background_value = 0; // used to determine background colour
-	int non_background_count = 0;
+	BMPFileHeader m_file_header;
+	BMPInfoHeader m_info_header;
+	BMPColourHeader m_colour_header;
+	std::vector<uint8_t> m_data;
+	std::vector<bool> m_blurred_edge_mask;
+	int m_red_count = 0;
+	int m_yellow_count = 0;
+	int m_background_value = 0; // used to determine background colour
+	int m_non_background_count = 0;
 };
 #endif

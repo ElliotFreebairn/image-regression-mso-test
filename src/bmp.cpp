@@ -16,23 +16,23 @@
 BMP::BMP(const char *filename, std::string basename)
 {
 	read(filename);
-	background_value = get_average_colour();
-	non_background_count = get_non_background_pixel_count(background_value);
+	m_background_value = get_average_colour();
+	m_non_background_count = get_non_background_pixel_count(m_background_value);
 
-	this->blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
+	this->m_blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
 }
 
 BMP::BMP(const BMP &other)
 {
-	file_header = other.file_header;
-	info_header = other.info_header;
-	colour_header = other.colour_header;
-	blurred_edge_mask = other.blurred_edge_mask;
-	data = other.data;
-	red_count = other.red_count;
-	yellow_count = other.yellow_count;
-	background_value = other.background_value;
-	non_background_count = other.non_background_count;
+	m_file_header = other.m_file_header;
+	m_info_header = other.m_info_header;
+	m_colour_header = other.m_colour_header;
+	m_blurred_edge_mask = other.m_blurred_edge_mask;
+	m_data = other.m_data;
+	m_red_count = other.m_red_count;
+	m_yellow_count = other.m_yellow_count;
+	m_background_value = other.m_background_value;
+	m_non_background_count = other.m_non_background_count;
 }
 
 void BMP::read(const char *filename)
@@ -44,46 +44,46 @@ void BMP::read(const char *filename)
 		throw std::runtime_error(std::string("Can't open the BMP file: ") + filename);
 	}
 
-	input.read((char *)&file_header, sizeof(file_header)); // read file header data into struct
-	if (file_header.file_type != 0x4D42)
+	input.read((char *)&m_file_header, sizeof(m_file_header)); // read file header data into struct
+	if (m_file_header.file_type != 0x4D42)
 	{
 		throw std::runtime_error("Not a BMP file, file header type has to be 'BM'");
 	}
 
-	input.read((char *)&info_header, sizeof(info_header)); // read info header data into struct
-	if (info_header.bit_count != 32)
+	input.read((char *)&m_info_header, sizeof(m_info_header)); // read info header data into struct
+	if (m_info_header.bit_count != 32)
 	{
 		throw std::runtime_error("Needs to be in RGBA format (32 bits), nothing else");
 	}
-	if (info_header.height < 0)
+	if (m_info_header.height < 0)
 	{
 		throw std::runtime_error("The program can treat only BMP images with the origin in the bottom left corner!");
 	}
 
-	input.seekg(file_header.offset_data, input.beg);
+	input.seekg(m_file_header.offset_data, input.beg);
 
-	info_header.size = sizeof(BMPInfoHeader) + sizeof(BMPColourHeader); // we know that its a 32-bit BMP
-	file_header.offset_data = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader);
-	file_header.file_size = file_header.offset_data;
+	m_info_header.size = sizeof(BMPInfoHeader) + sizeof(BMPColourHeader); // we know that its a 32-bit BMP
+	m_file_header.offset_data = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + sizeof(BMPColourHeader);
+	m_file_header.file_size = m_file_header.offset_data;
 
-	int32_t row_stride = info_header.width * info_header.bit_count / 8;
+	int32_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
 	uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
 	size_t padding_size = alligned_stride - row_stride;
 
 	std::vector<uint8_t> padding(padding_size);
-	data.resize(row_stride * info_header.height);
+	m_data.resize(row_stride * m_info_header.height);
 
 	// read the pixel data row by row, and handle the padding if its necessary
-	for (int y = 0; y < info_header.height; y++)
+	for (int y = 0; y < m_info_header.height; y++)
 	{
-		input.read((char *)(data.data() + y * row_stride), row_stride);
+		input.read((char *)(m_data.data() + y * row_stride), row_stride);
 
 		if (padding_size > 0)
 		{
 			input.read((char *)padding.data(), padding_size); // read in the padding so next read is correct
 		}
 	}
-	file_header.file_size += data.size() + padding_size * info_header.height;
+	m_file_header.file_size += m_data.size() + padding_size * m_info_header.height;
 }
 
 void BMP::write(const char *filename)
@@ -95,20 +95,20 @@ void BMP::write(const char *filename)
 	}
 
 	// write the headers
-	output.write((const char *)&file_header, sizeof(BMPFileHeader));
-	output.write((const char *)&info_header, sizeof(BMPInfoHeader));
-	output.write((const char *)&colour_header, sizeof(BMPColourHeader));
+	output.write((const char *)&m_file_header, sizeof(BMPFileHeader));
+	output.write((const char *)&m_info_header, sizeof(BMPInfoHeader));
+	output.write((const char *)&m_colour_header, sizeof(BMPColourHeader));
 
-	size_t row_stride = info_header.width * info_header.bit_count / 8;
+	size_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
 	size_t alligned_stride = (row_stride + 3) & ~3;
 	size_t padding_size = alligned_stride - row_stride;
 
 	std::vector<uint8_t> padding(padding_size, 0);
 
 	// write the pixel data row by row
-	for (int y = 0; y < info_header.height; y++)
+	for (int y = 0; y < m_info_header.height; y++)
 	{
-		output.write((const char *)(data.data() + y * row_stride), row_stride);
+		output.write((const char *)(m_data.data() + y * row_stride), row_stride);
 		if (padding_size > 0)
 		{
 			output.write((const char *)padding.data(), padding_size);
@@ -125,7 +125,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *file
 	}
 
 	int height = diff.get_height();
-	int bit_count = diff.info_header.bit_count;
+	int bit_count = diff.m_info_header.bit_count;
 	int bytes_per_pixel = bit_count / 8;
 
 	int combined_width = diff.get_width() + base.get_width() + target.get_width();
@@ -183,9 +183,9 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *file
 		}
 	}
 
-	BMPFileHeader file_header = diff.file_header;
-	BMPInfoHeader info_header = diff.info_header;
-	BMPColourHeader colour_header = diff.colour_header;
+	BMPFileHeader file_header = diff.m_file_header;
+	BMPInfoHeader info_header = diff.m_info_header;
+	BMPColourHeader colour_header = diff.m_colour_header;
 	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 
 	info_header.width = combined_width;
@@ -212,7 +212,7 @@ int BMP::get_non_background_pixel_count(int background_value) const
 	size_t pixel_count = get_width() * get_height();
 	for (size_t i = 0; i < pixel_count; i++)
 	{
-		uint8_t gray_value = data[i * 4]; // Assuming 32-bit BMP, gray value is in the first byte
+		uint8_t gray_value = m_data[i * 4]; // Assuming 32-bit BMP, gray value is in the first byte
 
 		if (std::abs(gray_value - background_value) > 20)
 		{
@@ -225,11 +225,11 @@ int BMP::get_non_background_pixel_count(int background_value) const
 int BMP::get_average_colour() const
 {
 	int total_gray = 0;
-	int32_t stride = info_header.bit_count / 8;
+	int32_t stride = m_info_header.bit_count / 8;
 	size_t pixel_count = get_width() * get_height();
 	for (size_t i = 0; i < pixel_count; i++)
 	{
-		uint8_t gray = data[i * stride];
+		uint8_t gray = m_data[i * stride];
 		total_gray += gray;
 	}
 
@@ -238,12 +238,12 @@ int BMP::get_average_colour() const
 
 void BMP::set_data(std::vector<uint8_t> &new_data)
 {
-	if (new_data.size() != data.size())
+	if (new_data.size() != m_data.size())
 	{
 		throw std::runtime_error("New data size " + std::to_string(new_data.size()) +
-								 " differs to current data size " + std::to_string(data.size()));
+								 " differs to current data size " + std::to_string(m_data.size()));
 	}
-	data = new_data;
+	m_data = new_data;
 }
 
 std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
