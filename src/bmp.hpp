@@ -61,19 +61,12 @@ public:
 
 	void read(const char *filename);
 	void write(const char *filename);
-
 	static void write_side_by_side(BMP& diff, BMP& base, BMP& target, const char *filename);
-
-	const BMPFileHeader &get_file_header() { return file_header; }
-	const BMPInfoHeader &get_info_header() { return info_header; }
-	const BMPColourHeader &get_colour_header() { return colour_header; }
 
 	const std::vector<uint8_t> &get_data() const { return data; }
 	const std::vector<bool> &get_blurred_edge_mask() const { return blurred_edge_mask; }
-
 	int get_width() const { return info_header.width; }
 	int get_height() const { return info_header.height; }
-
 	int get_red_count() const { return red_count; }
 	int get_yellow_count() const { return yellow_count; }
 	int get_background_value() const { return background_value; }
@@ -81,7 +74,6 @@ public:
 
 	void increment_red_count(int new_red) { red_count += new_red; }
 	void increment_yellow_count(int new_yellow) { yellow_count += new_yellow; }
-
 	void set_data(std::vector<uint8_t> &new_data);
 
 private:
