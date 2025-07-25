@@ -27,7 +27,7 @@ struct Pixel
 		return Pixel{data[index], data[index + 1], data[index + 2], data[index + 3]};
 	}
 
-	std::vector<uint8_t> to_vector()
+	std::vector<uint8_t> to_vector() const
 	{
 		return {blue, green, red, alpha};
 	}
@@ -41,20 +41,14 @@ struct Pixel
 	}
 
 	// Compare this pixel with another pixel and return true if they differ
-	bool differs_from(const Pixel &other, bool near_edge, int threshold = 40)
+	bool differs_from(const Pixel &other, bool near_edge, int threshold = 40) const
 	{
 		int avg_diff = (std::abs(red - other.red) + std::abs(green - other.green) + std::abs(blue - other.blue)) / 3;
 		threshold = near_edge ? 250 : threshold; // If a pixel is near an edge, the difference between pixels is stricter
 		return avg_diff > threshold;
 	}
 
-	// assumes grey scale (r == g == b), so red is good enough
-	bool is_near_white(int white_threshold = 240) const
-	{
-		return red > white_threshold;
-	}
-
-	bool is_red()
+	bool is_red () const
 	{
 		return (blue == 0 && green == 0 && red == 255);
 	}

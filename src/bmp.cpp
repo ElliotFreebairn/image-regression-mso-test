@@ -97,7 +97,7 @@ void BMP::write(const char *filename)
 	}
 }
 
-void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, const char *filename)
+void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target, const char *filename)
 {
 	std::ofstream output{filename, std::ios_base::binary};
 	if (!output)
