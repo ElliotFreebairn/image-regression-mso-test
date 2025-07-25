@@ -166,7 +166,7 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 
 BMP diff_and_write(PixelBasher &pixel_basher, BMP &base, BMP &target, bool allow_minor_diffs, const std::string &output_path)
 {
-	BMP diff = pixel_basher.compare_to_bmp(base, target, allow_minor_diffs);
+	BMP diff = pixel_basher.compare_bmps(base, target, allow_minor_diffs);
 	diff.write(output_path.c_str());
 	return diff;
 }
@@ -175,7 +175,7 @@ void compare_lo_previous(PixelBasher &pixelbasher, BMP &base, BMP &lo_diff, BMP 
 						 size_t page_index, const ParsedArguments &args)
 {
 	std::string lo_prev_diff_path = args.import_dir + "/" + args.basename + "_prev-import-page-" + std::to_string(page_index + 1) + ".bmp";
-	BMP lo_prev_diff = pixelbasher.compare_to_bmp(base, lo_previous, args.enable_minor_differences);
+	BMP lo_prev_diff = pixelbasher.compare_bmps(base, lo_previous, args.enable_minor_differences);
 	lo_prev_diff.write(lo_prev_diff_path.c_str());
 
 	std::string compare_path = args.import_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(page_index + 1) + ".bmp";
@@ -187,7 +187,7 @@ void compare_ms_previous(PixelBasher &pixelbasher, BMP &base, BMP &ms_conv_diff,
 						 size_t page_index, const ParsedArguments &args)
 {
     std::string prev_diff_path = args.export_dir + "/" + args.basename + "_prev-export-page-" + std::to_string(page_index + 1) + ".bmp";
-	BMP ms_prev_diff = pixelbasher.compare_to_bmp(base, ms_conv_previous, args.enable_minor_differences);
+	BMP ms_prev_diff = pixelbasher.compare_bmps(base, ms_conv_previous, args.enable_minor_differences);
 	ms_prev_diff.write(prev_diff_path.c_str());
 
 	std::string compare_path = args.export_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(page_index + 1) + ".bmp";

@@ -29,14 +29,13 @@ public:
 		GREEN
 	};
 	// Compares two BMP images and generates a diff image based on the differences (the diff is applied to the base image)
-	BMP compare_to_bmp(BMP &original, BMP &target, bool enable_minor_differences);
-	BMP compare_regressions(BMP &original, BMP &current, BMP &previous);
+	static BMP compare_bmps(const BMP &original, const BMP &target, bool enable_minor_differences);
+	static BMP compare_regressions(const BMP &original, const BMP &current, BMP &previous);
 
 private:
-	std::vector<bool> get_intersection_mask(BMP &original, BMP &target, int min_width, int min_height);
-
-	std::vector<uint8_t> compare_versions(Pixel &current_pixel, Pixel &previous_pixel, Pixel &base);
-	std::vector<uint8_t> compare_pixels(Pixel &base, Pixel &target, BMP &diff, bool near_edge, bool minor_differences);
-	std::vector<uint8_t> colour_pixel(Colour colour);
+	static std::vector<bool> get_intersection_mask(const BMP &original, const BMP &target, int min_width, int min_height);
+	static std::vector<uint8_t> compare_pixel_regression(const Pixel &current_pixel, const Pixel &previous_pixel, const Pixel &base);
+	static std::vector<uint8_t> compare_pixels(const Pixel &base, const Pixel &target, BMP &diff, bool near_edge, bool minor_differences);
+	static std::vector<uint8_t> colour_pixel(Colour colour);
 };
 #endif

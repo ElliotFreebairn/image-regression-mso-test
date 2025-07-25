@@ -14,7 +14,7 @@
 #include "pixel.hpp"
 #include "pixelbasher.hpp"
 
-BMP PixelBasher::compare_to_bmp(BMP &original, BMP &target, bool enable_minor_differences)
+BMP PixelBasher::compare_bmps(const BMP &original, const BMP &target, bool enable_minor_differences)
 {
 	int min_width = std::min(original.get_width(), target.get_width());
 	int min_height = std::min(original.get_height(), target.get_height());
@@ -56,7 +56,7 @@ BMP PixelBasher::compare_to_bmp(BMP &original, BMP &target, bool enable_minor_di
 	return diff;
 }
 
-BMP PixelBasher::compare_regressions(BMP &original, BMP &current, BMP &previous)
+BMP PixelBasher::compare_regressions(const BMP &original, const BMP &current, BMP &previous)
 {
 	int32_t min_width = std::min(original.get_width(), current.get_width());
 	int32_t min_height = std::min(original.get_height(), current.get_height());
@@ -82,7 +82,7 @@ BMP PixelBasher::compare_regressions(BMP &original, BMP &current, BMP &previous)
 			Pixel current_pixel = Pixel::get_pixel(current.get_data(), current_index);
 			Pixel previous_pixel = Pixel::get_pixel(previous.get_data(), previous_index);
 
-			std::vector<uint8_t> bgra = compare_versions(current_pixel, previous_pixel, original_pixel);
+			std::vector<uint8_t> bgra = compare_pixel_regression(current_pixel, previous_pixel, original_pixel);
 
 			for (int i = 0; i < pixel_stride; i++)
 			{
@@ -94,7 +94,7 @@ BMP PixelBasher::compare_regressions(BMP &original, BMP &current, BMP &previous)
 	return diff;
 }
 
-std::vector<bool> PixelBasher::get_intersection_mask(BMP &original, BMP &target, int width, int height)
+std::vector<bool> PixelBasher::get_intersection_mask(const BMP &original, const BMP &target, int width, int height)
 {
 
 	std::vector<bool> original_edge_map = original.get_blurred_edge_mask();
@@ -108,7 +108,7 @@ std::vector<bool> PixelBasher::get_intersection_mask(BMP &original, BMP &target,
 	return intersection_mask;
 }
 
-std::vector<uint8_t> PixelBasher::compare_versions(Pixel &current_pixel, Pixel &previous_pixel, Pixel &base)
+std::vector<uint8_t> PixelBasher::compare_pixel_regression(const Pixel &current_pixel, const Pixel &previous_pixel, const Pixel &base)
 {
 	if (current_pixel.is_red() && previous_pixel.is_red())
 	{
@@ -127,7 +127,7 @@ std::vector<uint8_t> PixelBasher::compare_versions(Pixel &current_pixel, Pixel &
 	return base.to_vector();
 }
 
-std::vector<uint8_t> PixelBasher::compare_pixels(Pixel &base, Pixel &target, BMP &diff, bool near_edge, bool minor_differences)
+std::vector<uint8_t> PixelBasher::compare_pixels(const Pixel &base, const Pixel &target, BMP &diff, bool near_edge, bool minor_differences)
 {
 	bool colour_differs = base.differs_from(target, near_edge);
 
