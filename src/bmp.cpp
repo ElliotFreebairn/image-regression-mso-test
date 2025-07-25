@@ -21,19 +21,6 @@ BMP::BMP(const char *filename, std::string basename)
 	m_blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
 }
 
-BMP::BMP(const BMP &other)
-{
-	m_file_header = other.m_file_header;
-	m_info_header = other.m_info_header;
-	m_colour_header = other.m_colour_header;
-	m_blurred_edge_mask = other.m_blurred_edge_mask;
-	m_data = other.m_data;
-	m_red_count = other.m_red_count;
-	m_yellow_count = other.m_yellow_count;
-	m_background_value = other.m_background_value;
-	m_non_background_count = other.m_non_background_count;
-}
-
 void BMP::read(const char *filename)
 {
 	std::ifstream input{filename, std::ios_base::binary};
