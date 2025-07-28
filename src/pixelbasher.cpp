@@ -9,6 +9,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 
 #include "pixel.hpp"
@@ -150,17 +151,12 @@ std::vector<std::uint8_t> PixelBasher::colour_pixel(Colour colour)
 	{
 	case Colour::YELLOW:
 		return {0, 197, 255, 255};
-		break;
 	case Colour::RED:
 		return {0, 0, 255, 255};
-		break;
 	case Colour::BLUE:
 		return {255, 0, 0, 255};
-		break;
 	case Colour::GREEN:
 		return {0, 255, 0, 255};
-		break;
-	default:
-		throw std::runtime_error("Invalid colour enum passed " + colour);
 	}
+	assert(false);
 }
