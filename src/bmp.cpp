@@ -23,7 +23,7 @@ struct BMPColourHeader
     std::uint32_t unused[16]{0};
 };
 
-static BMPColourHeader colour_header = {
+const static BMPColourHeader colour_header = {
     0x00ff0000,
     0x0000ff00,
     0x000000ff,
@@ -90,10 +90,11 @@ void BMP::write(const char *filename)
 		throw std::runtime_error("Cannot open/create the file to write");
 	}
 
+	BMPColourHeader local_colour_header = ::colour_header;
 	// write the headers
 	output.write(reinterpret_cast<char *>(&m_file_header), sizeof(m_file_header));
 	output.write(reinterpret_cast<char *>(&m_info_header), sizeof(m_info_header));
-	output.write(reinterpret_cast<char *>(&colour_header), sizeof(colour_header));
+	output.write(reinterpret_cast<char *>(&local_colour_header), sizeof(local_colour_header));
 
 	size_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
 	size_t alligned_stride = (row_stride + 3) & ~3;
