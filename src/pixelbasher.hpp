@@ -12,6 +12,7 @@
 #define PIXELBASHER_HPP
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "bmp.hpp"
@@ -34,8 +35,8 @@ public:
 
 private:
 	static std::vector<bool> get_intersection_mask(const BMP &original, const BMP &target, int min_width, int min_height);
-	static std::vector<uint8_t> compare_pixel_regression(const Pixel &current_pixel, const Pixel &previous_pixel, const Pixel &base);
-	static std::vector<uint8_t> compare_pixels(const Pixel &base, const Pixel &target, BMP &diff, bool near_edge, bool minor_differences);
-	static std::vector<uint8_t> colour_pixel(Colour colour);
+	static std::vector<std::uint8_t> compare_pixel_regression(const Pixel &current_pixel, const Pixel &previous_pixel, const Pixel &base);
+	static std::vector<std::uint8_t> compare_pixels(const Pixel &base, const Pixel &target, BMP &diff, bool near_edge, bool minor_differences);
+	static std::vector<std::uint8_t> colour_pixel(Colour colour);
 };
 #endif

@@ -20,26 +20,26 @@
 #pragma pack(push, 1)
 struct BMPFileHeader
 {
-	uint16_t file_type; // BM
-	uint32_t file_size;
-	uint16_t placeholder_1;
-	uint16_t placeholder_2;
-	uint32_t offset_data; // this is the start position of pixel data (bytes)
+	std::uint16_t file_type; // BM
+	std::uint32_t file_size;
+	std::uint16_t placeholder_1;
+	std::uint16_t placeholder_2;
+	std::uint32_t offset_data; // this is the start position of pixel data (bytes)
 };
 
 struct BMPInfoHeader
 {
-	uint32_t size;  // Size of the header (bytes)
-	int32_t width;  // in pixels
-	int32_t height; // in pixels
-	uint16_t planes;
-	uint16_t bit_count; // useful to check if file is RGBA or RGB
-	uint32_t compression;
-	uint32_t size_image;
-	int32_t x_per_meter;
-	int32_t y_per_meter;
-	uint32_t colours_used;
-	uint32_t colours_important;
+	std::uint32_t size;  // Size of the header (bytes)
+	std::int32_t width;  // in pixels
+	std::int32_t height; // in pixels
+	std::uint16_t planes;
+	std::uint16_t bit_count; // useful to check if file is RGBA or RGB
+	std::uint32_t compression;
+	std::uint32_t size_image;
+	std::int32_t x_per_meter;
+	std::int32_t y_per_meter;
+	std::uint32_t colours_used;
+	std::uint32_t colours_important;
 };
 #pragma pack(pop)
 
@@ -52,7 +52,7 @@ public:
 	void write(const char *filename);
 	static void write_side_by_side(const BMP& diff, const BMP& base, const BMP& target, const char *filename);
 
-	const std::vector<uint8_t> &get_data() const { return m_data; }
+	const std::vector<std::uint8_t> &get_data() const { return m_data; }
 	const std::vector<bool> &get_blurred_edge_mask() const { return m_blurred_edge_mask; }
 	int get_width() const { return m_info_header.width; }
 	int get_height() const { return m_info_header.height; }
@@ -63,7 +63,7 @@ public:
 
 	void increment_red_count(int new_red) { m_red_count += new_red; }
 	void increment_yellow_count(int new_yellow) { m_yellow_count += new_yellow; }
-	void set_data(std::vector<uint8_t> &new_data);
+	void set_data(std::vector<std::uint8_t> &new_data);
 
 private:
 	int get_average_colour() const;
@@ -71,7 +71,7 @@ private:
 
 	template<int Threshold>
 	std::vector<bool> sobel_edges();
-	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<uint8_t> &data, int width, int pixel_stride);
+	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width, int pixel_stride);
 
 	std::vector<bool> blur_edge_mask(const std::vector<bool> &edge_map);
 
@@ -81,7 +81,7 @@ private:
 	BMPFileHeader m_file_header;
 	BMPInfoHeader m_info_header;
 
-	std::vector<uint8_t> m_data;
+	std::vector<std::uint8_t> m_data;
 	std::vector<bool> m_blurred_edge_mask;
 	int m_red_count = 0;
 	int m_yellow_count = 0;
