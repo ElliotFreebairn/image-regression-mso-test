@@ -11,23 +11,24 @@
 #ifndef PIXEL_HPP
 #define PIXEL_HPP
 
+#include <cstdint>
 #include <iostream>
 #include <vector>
 
 struct Pixel
 {
-	uint8_t blue{0};
-	uint8_t green{0};
-	uint8_t red{0};
-	uint8_t alpha{0};
+	std::uint8_t blue{0};
+	std::uint8_t green{0};
+	std::uint8_t red{0};
+	std::uint8_t alpha{0};
 
 	// Constructor to initialise a pixel with RGBA values from the bmp data vector
-	static Pixel get_pixel(const std::vector<uint8_t> &data, int index)
+	static Pixel get_pixel(const std::vector<std::uint8_t> &data, int index)
 	{
 		return Pixel{data[index], data[index + 1], data[index + 2], data[index + 3]};
 	}
 
-	std::vector<uint8_t> to_vector() const
+	std::vector<std::uint8_t> to_vector() const
 	{
 		return {blue, green, red, alpha};
 	}

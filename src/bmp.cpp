@@ -15,12 +15,12 @@
 
 struct BMPColourHeader
 {
-    uint32_t red_mask;
-    uint32_t green_mask;
-    uint32_t blue_mask;
-    uint32_t alpha_mask;
-    uint32_t colour_space;
-    uint32_t unused[16]{0};
+    std::uint32_t red_mask;
+    std::uint32_t green_mask;
+    std::uint32_t blue_mask;
+    std::uint32_t alpha_mask;
+    std::uint32_t colour_space;
+    std::uint32_t unused[16]{0};
 };
 
 static BMPColourHeader colour_header = {
@@ -68,8 +68,8 @@ void BMP::read(const char *filename)
 
 	input.seekg(m_file_header.offset_data, input.beg);
 
-	int32_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
-	uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
+	std::int32_t row_stride = m_info_header.width * m_info_header.bit_count / 8;
+	std::uint32_t alligned_stride = (row_stride + 3) & ~3; // This rounds up to the nearest multiple of 4
 	size_t padding_size = alligned_stride - row_stride;
 
 	m_data.resize(row_stride * m_info_header.height);
@@ -99,7 +99,7 @@ void BMP::write(const char *filename)
 	size_t alligned_stride = (row_stride + 3) & ~3;
 	size_t padding_size = alligned_stride - row_stride;
 
-	std::vector<uint8_t> padding(padding_size, 0);
+	std::vector<std::uint8_t> padding(padding_size, 0);
 
 	// write the pixel data row by row
 	for (int y = 0; y < m_info_header.height; y++)
@@ -125,21 +125,21 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 	int bytes_per_pixel = bit_count / 8;
 
 	int combined_width = diff.get_width() + base.get_width() + target.get_width();
-	size_t row_stride = combined_width * bytes_per_pixel;
-	size_t alligned_stride = (row_stride + 3) & ~3; // rounds down to the nearest 4 (4 bytes per pixel in a 32-bit RGBA BMP)
-	size_t padding_size = alligned_stride - row_stride;
+	std::size_t row_stride = combined_width * bytes_per_pixel;
+	std::size_t alligned_stride = (row_stride + 3) & ~3; // rounds down to the nearest 4 (4 bytes per pixel in a 32-bit RGBA BMP)
+	std::size_t padding_size = alligned_stride - row_stride;
 
-	std::vector<uint8_t> combined_data(alligned_stride * height, 0);
+	std::vector<std::uint8_t> combined_data(alligned_stride * height, 0);
 
 	for (int y = 0; y < height; ++y)
 	{
-		uint8_t *dest_row = &combined_data[y * alligned_stride];
-		size_t dest_col = 0;
+		std::uint8_t *dest_row = &combined_data[y * alligned_stride];
+		std::size_t dest_col = 0;
 
 		int src_width = diff.get_width();
-		size_t src_row_stride = src_width * bytes_per_pixel;
-		const std::vector<uint8_t> &src_data = diff.get_data();
-		const uint8_t *src_row = &src_data[y * src_row_stride];
+		std::size_t src_row_stride = src_width * bytes_per_pixel;
+		const std::vector<std::uint8_t> &src_data = diff.get_data();
+		const std::uint8_t *src_row = &src_data[y * src_row_stride];
 
 		for (int x = 0; x < src_width; ++x)
 		{
@@ -152,8 +152,8 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 
 		src_width = base.get_width();
 		src_row_stride = src_width * bytes_per_pixel;
-		const std::vector<uint8_t> &base_data = base.get_data();
-		const uint8_t *base_row = &base_data[y * src_row_stride];
+		const std::vector<std::uint8_t> &base_data = base.get_data();
+		const std::uint8_t *base_row = &base_data[y * src_row_stride];
 
 		for (int x = 0; x < src_width; ++x)
 		{
@@ -166,8 +166,8 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 
 		src_width = base.get_width();
 		src_row_stride = src_width * bytes_per_pixel;
-		const std::vector<uint8_t> &target_data = target.get_data();
-		const uint8_t *target_row = &target_data[y * src_row_stride];
+		const std::vector<std::uint8_t> &target_data = target.get_data();
+		const std::uint8_t *target_row = &target_data[y * src_row_stride];
 
 		for (int x = 0; x < src_width; ++x)
 		{
@@ -191,7 +191,7 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 	output.write(reinterpret_cast<char *>(&info_header), sizeof(info_header));
 	output.write(reinterpret_cast<char *>(&local_colour_header), sizeof(local_colour_header));
 
-	std::vector<uint8_t> padding(padding_size, 0);
+	std::vector<std::uint8_t> padding(padding_size, 0);
 	for (int y = 0; y < info_header.height; y++)
 	{
 		output.write(reinterpret_cast<char *>(combined_data.data() + y * row_stride), row_stride);
@@ -205,10 +205,10 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 int BMP::get_non_background_pixel_count(int background_value) const
 {
 	int non_background_count = 0;
-	size_t pixel_count = get_width() * get_height();
-	for (size_t i = 0; i < pixel_count; i++)
+	std::size_t pixel_count = get_width() * get_height();
+	for (std::size_t i = 0; i < pixel_count; i++)
 	{
-		uint8_t gray_value = m_data[i * 4]; // Assuming 32-bit BMP, gray value is in the first byte
+		std::uint8_t gray_value = m_data[i * 4]; // Assuming 32-bit BMP, gray value is in the first byte
 
 		if (std::abs(gray_value - background_value) > 20)
 		{
@@ -221,18 +221,18 @@ int BMP::get_non_background_pixel_count(int background_value) const
 int BMP::get_average_colour() const
 {
 	int total_gray = 0;
-	int32_t stride = m_info_header.bit_count / 8;
-	size_t pixel_count = get_width() * get_height();
-	for (size_t i = 0; i < pixel_count; i++)
+	std::int32_t stride = m_info_header.bit_count / 8;
+	std::size_t pixel_count = get_width() * get_height();
+	for (std::size_t i = 0; i < pixel_count; i++)
 	{
-		uint8_t gray = m_data[i * stride];
+		std::uint8_t gray = m_data[i * stride];
 		total_gray += gray;
 	}
 
 	return total_gray / pixel_count;
 }
 
-void BMP::set_data(std::vector<uint8_t> &new_data)
+void BMP::set_data(std::vector<std::uint8_t> &new_data)
 {
 	if (new_data.size() != m_data.size())
 	{
@@ -244,8 +244,8 @@ void BMP::set_data(std::vector<uint8_t> &new_data)
 
 std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 {
-	int32_t width = m_info_header.width;
-	int32_t height = m_info_header.height;
+	std::int32_t width = m_info_header.width;
+	std::int32_t height = m_info_header.height;
 	std::vector<bool> blurred_mask(width * height, false);
 
 	for (int y = 1; y < height - 1; y++)
@@ -267,10 +267,10 @@ std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 template<int Threshold> // compile-time constant
 std::vector<bool> BMP::sobel_edges()
 {
-	int32_t width = m_info_header.width;
-	int32_t height = m_info_header.height;
-	const std::vector<uint8_t> &data = m_data;
-	int32_t pixel_stride = 4;
+	std::int32_t width = m_info_header.width;
+	std::int32_t height = m_info_header.height;
+	const std::vector<std::uint8_t> &data = m_data;
+	std::int32_t pixel_stride = 4;
 
 	std::vector<bool> result(width * height, false);
 
@@ -309,7 +309,7 @@ void BMP::blur_pixels(int x, int y, int width, int height, std::vector<bool> &ma
 	}
 }
 
-std::array<int, 2> BMP::get_sobel_gradients(int y, int x, const std::vector<uint8_t> &data, int width, int pixel_stride)
+std::array<int, 2> BMP::get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width, int pixel_stride)
 {
 	auto index = [&](int row, int col)
 	{
