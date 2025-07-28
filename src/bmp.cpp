@@ -181,7 +181,7 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 
 	BMPFileHeader file_header = diff.m_file_header;
 	BMPInfoHeader info_header = diff.m_info_header;
-	BMPColourHeader colour_header = colour_header;
+	BMPColourHeader local_colour_header = ::colour_header;
 
 	int image_size = alligned_stride * diff.get_height(); // alligned stride is width in bytes
 	info_header.width = combined_width;
@@ -189,7 +189,7 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 
 	output.write(reinterpret_cast<char *>(&file_header), sizeof(file_header));
 	output.write(reinterpret_cast<char *>(&info_header), sizeof(info_header));
-	output.write(reinterpret_cast<char *>(&colour_header), sizeof(colour_header));
+	output.write(reinterpret_cast<char *>(&local_colour_header), sizeof(local_colour_header));
 
 	std::vector<uint8_t> padding(padding_size, 0);
 	for (int y = 0; y < info_header.height; y++)
