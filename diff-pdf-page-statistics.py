@@ -30,11 +30,6 @@
 
 import argparse
 import os
-import wand # pip install wand && OS_INSTALLER install imagemagick
-from wand.image import Image
-from wand.display import display
-from wand.exceptions import PolicyError
-from wand.exceptions import CacheError
 import subprocess
 import time
 import glob
@@ -1171,9 +1166,9 @@ def main():
              args.history_dir + "/import_mso-page.bmp"
         ])
 
-    PIXELBASHER_BIN = base_dir + "pixelbasher"
-    # DIFF_OUTPUT_DIR = os.path.join(IMAGE_DUMP_DIR, "diffs/")
-    # os.makedirs(DIFF_OUTPUT_DIR, exist_ok=True)
+
+    base_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
+    PIXELBASHER_BIN = os.path.join(base_dir, "pixelbasher")
 
     # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
     ms_orig_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
