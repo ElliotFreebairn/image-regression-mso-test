@@ -8,6 +8,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <bit>
 #include <cmath>
 #include <fstream>
 
@@ -43,6 +44,7 @@ BMP::BMP(const char *filename, std::string basename)
 
 void BMP::read(const char *filename)
 {
+    static_assert(std::endian::native == std::endian::little, "This code only works for little endian");
 	std::ifstream input{filename, std::ios_base::binary};
 
 	if (!input)
