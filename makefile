@@ -17,4 +17,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 -include $(OBJS:.o=.d)
 
 clean:
-	rm -f $(OBJ_DIR)/*.o $(TARGET)
+	rm -fr $(OBJ_DIR) $(TARGET)
