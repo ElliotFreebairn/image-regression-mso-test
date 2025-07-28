@@ -202,22 +202,28 @@ namespace mso_test
             startApplication(application);
         }
 
-        public void getLOParams(string formatTo, string targetDir, string fullOrigFileName, out string loName, out string loParams)
+        public void getLOParams(ApplicationType application, string formatTo, string targetDir, string fullOrigFileName, out string loName, out string loParams)
         {
             loName = Path.Combine(config.DesktopConverterLocation, "soffice.exe");
 
-            // Prior to LO 25.8, "--convert-to docx" always resulted in using the Word 2007 filter (and after 7.6 always output compatiblityMode 12),
-            // So force using the modern filter (compat15 since 7.0 in 2020) to ensure equivalent comparisons.
             if (formatTo == "docx")
+            {
+                // Prior to LO 25.8, "--convert-to docx" always resulted in using the Word 2007 filter (and after 7.6 always output compatiblityMode 12),
+                // So force using the modern filter (compat15 since 7.0 in 2020) to ensure equivalent comparisons.
                 formatTo = @"""docx:Office Open XML Text""";
+            }
+            else if (formatTo == "pdf" && application == ApplicationType.Word)
+                // After tdf#167659 this doesn't show tracking marks in exported PDF anymore, which is the default in Word
+                formatTo = @"""pdf:writer_pdf_Export:{\""ExportTrackedChanges\"":{\""type\"":\""boolean\"",\""value\"":\""false\""}
+    }""";
             // In more recent versions --convert-to implies headless, but before 5.0 that doesn't seem to be the case
             loParams = "--headless --convert-to " + formatTo + " --outdir " + targetDir + " " + fullOrigFileName;
         }
-        public bool convertWithLO(string formatTo, string targetDir, string fullOrigFileName, string fullConvertedFileName)
+        public bool convertWithLO(ApplicationType application, string formatTo, string targetDir, string fullOrigFileName, string fullConvertedFileName)
         {
             Process loProcess = new Process(); ;
             string loName, loParams;
-            getLOParams(formatTo, targetDir, fullOrigFileName, out loName, out loParams);
+            getLOParams(application, formatTo, targetDir, fullOrigFileName, out loName, out loParams);
             loProcess.StartInfo.FileName = loName;
             loProcess.StartInfo.Arguments = loParams;
             loProcess.StartInfo.ErrorDialog = false;
@@ -702,12 +708,12 @@ namespace mso_test
 
                 // Round-trip file to MSO format in LO
                 watch.Restart();
-                success = convertWithLO(convertTo, targetDir, fullFileName, convertedFileName);
+                success = convertWithLO(application, convertTo, targetDir, fullFileName, convertedFileName);
                 fileStats.addTimeToConvert(fileType, watch.ElapsedMilliseconds);
                 if (!success)
                 {
                     string loName, loParams;
-                    getLOParams(convertTo, targetDir, fullFileName, out loName, out loParams);
+                    getLOParams(application, convertTo, targetDir, fullFileName, out loName, out loParams);
                     Logger.Write(fileName + " - Error during conversion with LO, full command used:\n\t" + loName + " " + loParams);
                     fileStats.addToFailConvertFiles(fileType, fileName);
                 }
@@ -722,7 +728,7 @@ namespace mso_test
                 FileInfo PDFexport = new FileInfo(convertedPDFFileName);
                 if (!PDFexport.Exists)
                 {
-                    success = convertWithLO("pdf", targetDir, fullFileName, convertedPDFFileName);
+                    success = convertWithLO(application, "pdf", targetDir, fullFileName, convertedPDFFileName);
                     if (!success)
                         Logger.Write($"Fail creating PDF export; {fileName}");
                 }
@@ -788,15 +794,19 @@ namespace mso_test
             const int maxTestTries = 5;
             int totalTries = 0;
             string message = "";
+            string convertToUri = convertService.BaseAddress + "cool/convert-to/" + convertTo;
+            string capabilitiesUri = convertService.BaseAddress + "hosting/capabilities";
             // If first conversion is unsuccessful, test the endpoint, and retry conversion if succesful
             for (int numTries = 0; numTries < maxConvertTries; numTries++)
             {
-                using (var request = new HttpRequestMessage(new HttpMethod("POST"), convertService.BaseAddress + "cool/convert-to/" + convertTo))
+                using (var request = new HttpRequestMessage(new HttpMethod("POST"), convertToUri))
                 {
                     totalTries++;
                     var multipartContent = new MultipartFormDataContent
                     {
-                        { new ByteArrayContent(File.ReadAllBytes(fullFileName)), "data", Path.GetFileName(fullFileName) }
+                        { new ByteArrayContent(File.ReadAllBytes(fullFileName)), "data", Path.GetFileName(fullFileName) },
+                        // After tdf#167659 this doesn't show tracking marks in exported PDF anymore, which is the default in Word
+                        { new StringContent("{\"ExportTrackedChanges\":{\"type\":\"boolean\",\"value\":\"false\"}}"), "options" }
                     };
                     request.Content = multipartContent;
                     try
@@ -843,7 +853,7 @@ namespace mso_test
                 for (convertTries = 0; convertTries < maxTestTries; convertTries++)
                 {
                     totalTries++;
-                    using (var request = new HttpRequestMessage(new HttpMethod("GET"), convertService.BaseAddress + "hosting/capabilities"))
+                    using (var request = new HttpRequestMessage(new HttpMethod("GET"), capabilitiesUri))
                     {
                         try
                         {
