@@ -21,7 +21,7 @@ struct BMPColourHeader
     std::uint32_t blue_mask;
     std::uint32_t alpha_mask;
     std::uint32_t colour_space;
-    std::uint32_t unused[16]{0};
+    std::uint32_t unused[16];
 };
 
 const static BMPColourHeader colour_header = {
@@ -30,7 +30,7 @@ const static BMPColourHeader colour_header = {
     0x000000ff,
     0xff000000,
     0x73524742,
-    {0}
+    {}
 };
 
 
