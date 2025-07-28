@@ -61,8 +61,9 @@ void write_stats_to_csv(const BMP &image1, const BMP &image2, const BMP &diff, i
 			 << (static_cast<double>(diff.get_red_count()) / image2_total_pixels) << "\n";
 }
 
-void parse_flag(int &arg_index, bool &option, std::string value, std::string option_name)
+void parse_flag(char *argv[], int &arg_index, bool &option, std::string option_name)
 {
+	std::string value = argv[arg_index - 1];
 	if (value == "true" || value == "false")
 	{
 		option = (value == "true");
@@ -76,17 +77,10 @@ void parse_flag(int &arg_index, bool &option, std::string value, std::string opt
 
 void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 {
-	std::string minor_differences = argv[arg_index - 1];
-	parse_flag(arg_index, args.enable_minor_differences, minor_differences, "minor-differences");
-
-	std::string image_dump = argv[arg_index - 1];
-	parse_flag(arg_index, args.image_dump, image_dump, "image_dump");
-
-	std::string ms_previous = argv[arg_index - 1];
-	parse_flag(arg_index, args.ms_previous, ms_previous, "ms_previous");
-
-	std::string lo_previous = argv[arg_index - 1];
-	parse_flag(arg_index, args.lo_previous, lo_previous, "lo_previous");
+	parse_flag(argv, arg_index, args.enable_minor_differences, "minor-differences");
+	parse_flag(argv, arg_index, args.image_dump, "image_dump");
+	parse_flag(argv, arg_index, args.ms_previous, "ms_previous");
+	parse_flag(argv, arg_index, args.lo_previous, "lo_previous");
 }
 
 void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
