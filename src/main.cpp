@@ -72,7 +72,7 @@ void parse_flag(char *argv[], int &arg_index, bool &option, std::string option_n
 	}
 	else
 	{
-		throw std::runtime_error("Incorrect usage for " + option_name + ": " + value + " should be true of flase");
+		throw std::runtime_error("Incorrect usage for " + option_name + ": " + value + " should be true of false");
 	}
 }
 

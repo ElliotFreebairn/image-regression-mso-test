@@ -46,19 +46,24 @@ void BMP::read(const char *filename)
 {
     static_assert(std::endian::native == std::endian::little, "This code only works for little endian");
 	std::ifstream input{filename, std::ios_base::binary};
-
 	if (!input)
 	{
 		throw std::runtime_error(std::string("Can't open the BMP file: ") + filename);
 	}
 
 	input.read(reinterpret_cast<char *>(&m_file_header), sizeof(m_file_header)); // read file header data into struct
+	if(!input) {
+		throw std::runtime_error(std::string("Error: reading file header has led to bad input state"));
+	}
 	if (m_file_header.file_type != 0x4D42)
 	{
 		throw std::runtime_error("Not a BMP file, file header type has to be 'BM'");
 	}
 
 	input.read(reinterpret_cast<char *>(&m_info_header), sizeof(m_info_header)); // read info header data into struct
+	if (!input) {
+		throw std::runtime_error(std::string("Error: reading info header has led to bad input state"));
+	}
 	if (m_info_header.bit_count != 32)
 	{
 		throw std::runtime_error("Needs to be in RGBA format (32 bits), nothing else");
