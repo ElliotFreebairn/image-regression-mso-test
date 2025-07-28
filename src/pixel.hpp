@@ -11,9 +11,13 @@
 #ifndef PIXEL_HPP
 #define PIXEL_HPP
 
+#include <array>
 #include <cstdint>
 #include <iostream>
 #include <vector>
+
+
+#include "bmp.hpp"
 
 struct Pixel
 {
@@ -22,36 +26,22 @@ struct Pixel
 	std::uint8_t red{0};
 	std::uint8_t alpha{0};
 
-	// Constructor to initialise a pixel with RGBA values from the bmp data vector
-	static Pixel get_pixel(const std::vector<std::uint8_t> &data, int index)
+	static std::array<std::uint8_t, pixel_stride> get_vector(const std::uint8_t* src_row)
 	{
-		return Pixel{data[index], data[index + 1], data[index + 2], data[index + 3]};
-	}
-
-	std::vector<std::uint8_t> to_vector() const
-	{
-		return {blue, green, red, alpha};
-	}
-
-	std::string to_string() const
-	{
-		return "R:" + std::to_string(static_cast<int>(red)) + " " +
-			   "G:" + std::to_string(static_cast<int>(green)) + " " +
-			   "B:" + std::to_string(static_cast<int>(blue)) + " " +
-			   "A:" + std::to_string(static_cast<int>(alpha));
+		return {src_row[0], src_row[1], src_row[2], src_row[3]};
 	}
 
 	// Compare this pixel with another pixel and return true if they differ
-	bool differs_from(const Pixel &other, bool near_edge, int threshold = 40) const
+	static bool differs_from(std::array<std::uint8_t, 4> original, std::array<std::uint8_t, 4> target, bool near_edge, int threshold = 40)
 	{
-		int avg_diff = (std::abs(red - other.red) + std::abs(green - other.green) + std::abs(blue - other.blue)) / 3;
-		threshold = near_edge ? 250 : threshold; // If a pixel is near an edge, the difference between pixels is stricter
+		int avg_diff = std::abs(original[2] - target[2]);
+		threshold = near_edge ? 250 : threshold;
 		return avg_diff > threshold;
 	}
 
-	bool is_red () const
+	static bool is_red(std::array<uint8_t, pixel_stride> pixel)
 	{
-		return (blue == 0 && green == 0 && red == 255);
+		return pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 255;
 	}
 };
 #endif
