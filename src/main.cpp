@@ -9,6 +9,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -77,6 +78,7 @@ void parse_flag(char *argv[], int &arg_index, bool &option, std::string option_n
 
 void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 {
+	assert(arg_index >= 4);
 	parse_flag(argv, arg_index, args.enable_minor_differences, "minor-differences");
 	parse_flag(argv, arg_index, args.image_dump, "image_dump");
 	parse_flag(argv, arg_index, args.ms_previous, "ms_previous");
@@ -85,6 +87,7 @@ void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 
 void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
 {
+	assert(arg_index >= 5);
 	args.image_dump_dir = argv[--arg_index];
 	args.export_compare_dir = argv[--arg_index];
 	args.import_compare_dir = argv[--arg_index];
