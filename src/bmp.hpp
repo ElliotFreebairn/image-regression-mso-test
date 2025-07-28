@@ -43,6 +43,8 @@ struct BMPInfoHeader
 };
 #pragma pack(pop)
 
+constexpr int pixel_stride = 4;
+
 class BMP
 {
 public:
@@ -71,7 +73,7 @@ private:
 
 	template<int Threshold>
 	std::vector<bool> sobel_edges();
-	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width, int pixel_stride);
+	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width);
 
 	std::vector<bool> blur_edge_mask(const std::vector<bool> &edge_map);
 

@@ -278,7 +278,6 @@ std::vector<bool> BMP::sobel_edges()
 	std::int32_t width = m_info_header.width;
 	std::int32_t height = m_info_header.height;
 	const std::vector<std::uint8_t> &data = m_data;
-	std::int32_t pixel_stride = 4;
 
 	std::vector<bool> result(width * height, false);
 
@@ -287,7 +286,7 @@ std::vector<bool> BMP::sobel_edges()
 	{
 		for (int x = 1; x < width - 1; x++)
 		{
-			auto [g_x, g_y] = get_sobel_gradients(y, x, data, width, pixel_stride);
+			auto [g_x, g_y] = get_sobel_gradients(y, x, data, width);
 
 			// Calculate gradient magnitude (clamped to 255)
 			int magnitude = std::min(255, static_cast<int>(std::sqrt(g_x * g_x + g_y * g_y)));
@@ -317,7 +316,7 @@ void BMP::blur_pixels(int x, int y, int width, int height, std::vector<bool> &ma
 	}
 }
 
-std::array<int, 2> BMP::get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width, int pixel_stride)
+std::array<int, 2> BMP::get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width)
 {
 	auto index = [&](int row, int col)
 	{

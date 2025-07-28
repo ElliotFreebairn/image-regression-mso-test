@@ -35,8 +35,8 @@ public:
 
 private:
 	static std::vector<bool> get_intersection_mask(const BMP &original, const BMP &target, int min_width, int min_height);
-	static std::vector<std::uint8_t> compare_pixel_regression(const Pixel &current_pixel, const Pixel &previous_pixel, const Pixel &base);
-	static std::vector<std::uint8_t> compare_pixels(const Pixel &base, const Pixel &target, BMP &diff, bool near_edge, bool minor_differences);
-	static std::vector<std::uint8_t> colour_pixel(Colour colour);
+	static std::array<std::uint8_t, 4> compare_pixel_regression(std::array<std::uint8_t, 4> original, std::array<std::uint8_t, 4> current, std::array<std::uint8_t, 4> previous);
+	static std::array<std::uint8_t, 4> compare_pixels(std::array<std::uint8_t, 4> original, std::array<std::uint8_t, 4> target, BMP &diff, bool near_edge, bool minor_differences);
+	static std::array<std::uint8_t, 4> colour_pixel(Colour colour);
 };
 #endif
