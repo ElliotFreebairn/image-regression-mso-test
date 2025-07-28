@@ -367,6 +367,7 @@ FodyWeavers.xsd
 
 # Ignore build artifacts
 *.o
+*.d
 
 # Ignore images
 *.bmp
