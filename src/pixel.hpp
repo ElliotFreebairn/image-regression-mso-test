@@ -35,7 +35,7 @@ struct Pixel
 	static bool differs_from(std::array<std::uint8_t, 4> original, std::array<std::uint8_t, 4> target, bool near_edge, int threshold = 40)
 	{
 		int avg_diff = std::abs(original[2] - target[2]);
-		threshold = near_edge ? 250 : threshold;
+		threshold = near_edge ? 180 : threshold;
 		return avg_diff > threshold;
 	}
 
