@@ -42,6 +42,8 @@ BMP::BMP(const char *filename, std::string basename)
 	m_blurred_edge_mask = blur_edge_mask(sobel_edges<15>());
 }
 
+BMP::BMP() {}
+
 void BMP::read(const char *filename)
 {
     static_assert(std::endian::native == std::endian::little, "This code only works for little endian");

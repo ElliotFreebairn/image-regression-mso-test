@@ -1176,7 +1176,7 @@ def main():
     if IS_FILE_MS_PREV:
         ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import_mso*.bmp")))
 
-    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.minor_differences).lower()]
+    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.no_save_overlay).lower(), str(args.minor_differences).lower()]
 
     # Run pixelbasher to compare differnces between MSO and LO PDF pages
     subprocess.run(
