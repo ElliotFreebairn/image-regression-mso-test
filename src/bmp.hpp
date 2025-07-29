@@ -52,7 +52,8 @@ public:
 
 	void read(const char *filename);
 	void write(const char *filename);
-	static void write_side_by_side(const BMP& diff, const BMP& base, const BMP& target, const char *filename);
+    void stamp_name(BMP& stamp);
+	static void write_side_by_side(BMP& diff, BMP& base, BMP& target, std::string stamp_location, const char *filename);
 
 	const std::vector<std::uint8_t> &get_data() const { return m_data; }
 	const std::vector<bool> &get_blurred_edge_mask() const { return m_blurred_edge_mask; }

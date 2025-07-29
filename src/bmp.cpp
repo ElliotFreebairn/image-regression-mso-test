@@ -120,7 +120,28 @@ void BMP::write(const char *filename)
 	}
 }
 
-void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target, const char *filename)
+void BMP::stamp_name(BMP& stamp) {
+    const auto& stamp_data = stamp.get_data();
+    const std::size_t stamp_row_stride = stamp.get_width() * 4;
+    const std::size_t base_row_stride = get_width() * 4;
+
+    if (stamp.get_width() > get_width() || stamp.get_height() > get_height()) {
+        throw std::runtime_error("Stamp is larger than base image");
+    }
+
+    for (int y = 0; y < stamp.get_height(); ++y) {
+        for (int x = 0; x < stamp.get_width(); ++x) {
+            std::size_t stamp_index = (stamp.get_height() - 1 -y) * stamp_row_stride + x * 4;
+            std::size_t base_index  = (m_info_header.height - 1 - y) * base_row_stride  + x * 4;
+
+            for (int b = 0; b < 4; ++b) {
+                m_data[base_index + b] = stamp_data[stamp_index + b];
+            }
+        }
+    }
+}
+
+void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stamp_location, const char *filename)
 {
 	std::ofstream output{filename, std::ios_base::binary};
 	if (!output)
@@ -138,6 +159,19 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
 	std::size_t padding_size = alligned_stride - row_stride;
 
 	std::vector<std::uint8_t> combined_data(alligned_stride * height, 0);
+
+    // stamping/labelling the images for better differnetiation
+	std::string diff_location = stamp_location + "/diff.bmp";
+	std::string ms_office_location = stamp_location + "/ms-office.bmp";
+	std::string cool_location = stamp_location + "/cool.bmp";
+
+	BMP diff_stamp(diff_location.c_str(), "diff");
+    BMP ms_office_stamp(ms_office_location.c_str(), "office");
+    BMP cool_stamp(cool_location.c_str(), "cool");
+
+    diff.stamp_name(diff_stamp);
+    base.stamp_name(ms_office_stamp);
+    target.stamp_name(cool_stamp);
 
 	for (int y = 0; y < height; ++y)
 	{

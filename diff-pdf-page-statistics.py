@@ -1161,6 +1161,7 @@ def main():
 
     base_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
     PIXELBASHER_BIN = os.path.join(base_dir, "pixelbasher")
+    STAMP_DIR = os.path.join(base_dir, "stamps/")
 
     # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
     ms_orig_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
@@ -1191,6 +1192,7 @@ def main():
         [IMPORT_COMPARE_DIR] +
         [EXPORT_COMPARE_DIR] +
         [IMAGE_DUMP_DIR] +
+        [STAMP_DIR] +
         options,
         check=True
     )

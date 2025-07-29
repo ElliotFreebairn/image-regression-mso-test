@@ -27,6 +27,7 @@ struct ParsedArguments
 	std::string import_compare_dir;
 	std::string export_compare_dir;
 	std::string image_dump_dir;
+	std::string stamp_dir;
 	std::vector<BMP> ms_orig_images;
 	std::vector<BMP> lo_images;
 	std::vector<BMP> ms_conv_images;
@@ -87,7 +88,8 @@ void parse_flags(int &arg_index, char *argv[], ParsedArguments &args)
 
 void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
 {
-	assert(arg_index >= 5);
+	assert(arg_index >= 6);
+	args.stamp_dir = argv[--arg_index];
 	args.image_dump_dir = argv[--arg_index];
 	args.export_compare_dir = argv[--arg_index];
 	args.import_compare_dir = argv[--arg_index];
@@ -105,12 +107,12 @@ void parse_image_group(char *argv[], int start, int pages, std::vector<BMP> &ima
 
 ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 {
-	if (argc < 10)
+	if (argc < 11)
 	{
 		throw std::runtime_error("Incorrect usage: " + std::string(argv[0]) + " filename.ext" +
 								 "ms_orig-1.bmp ms_orig-2.bmp ... lo-1.bmp lo-2.bmp ... ms_conv.bmp-1.bmp ms_conv-2.bmp ..." +
 								 "[lo_previous-1.bmp lo_previous-2.bmp ... ms_conv_previous-1.bmp ms_conv_previous-2.bmp ...]" +
-								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ image-dump_dir/" +
+								 "import_dir/ exported_dir/ import-compare_dir/ export-compare_dir/ image-dump_dir/ stamp_dir/" +
 								 "[lo_previous] [ms_preivous] [image_dump] [enable_minor_differences]");
 	}
 
@@ -217,7 +219,7 @@ int main(int argc, char *argv[])
 			if (args.image_dump)
 			{
 				std::string side_by_side_path = args.image_dump_dir + "/lo_comparison-page-" + std::to_string(i + 1) + ".bmp";
-				BMP::write_side_by_side(lo_diff, base, lo, side_by_side_path.c_str());
+				BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, side_by_side_path.c_str());
 			}
 
 			std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
@@ -225,7 +227,7 @@ int main(int argc, char *argv[])
 			if (args.image_dump)
 			{
 				std::string side_by_side_path = args.image_dump_dir + "/ms_conv_comparison-page-" + std::to_string(i + 1) + ".bmp";
-				BMP::write_side_by_side(ms_conv_diff, base, ms_conv, side_by_side_path.c_str());
+				BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, side_by_side_path.c_str());
 			}
 
 			if (args.lo_previous)
