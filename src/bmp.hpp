@@ -49,7 +49,7 @@ class BMP
 {
 public:
 	BMP(const char *filename, std::string basename);
-
+	BMP();
 	void read(const char *filename);
 	void write(const char *filename);
     void stamp_name(BMP& stamp);
