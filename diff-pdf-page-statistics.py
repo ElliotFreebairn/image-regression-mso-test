@@ -52,6 +52,7 @@ def main():
     parser.add_argument("--max_page", default="10") # limit PDF comparison to the first ten pages
     parser.add_argument("--no_save_overlay", action="store_true") # default is false
     parser.add_argument("--resolution", default="200") # default is 200 DPI
+    parser.add_argument("--resize", default="75") # deafult is 75 %
     parser.add_argument("--debug", action="store_true") # default is false
     parser.add_argument("--image_dump", action="store_true") # default is false
     parser.add_argument("--minor_differences", default="false") # default is false
@@ -59,6 +60,7 @@ def main():
 
     DEBUG = args.debug
     MAX_PAGES = int(args.max_page)
+    resize_percentage = f'{args.resize}%'
 
     # Exclude notorious false positives that have no redeeming value in constantly brought to the attention of QA
     if (
@@ -1082,13 +1084,8 @@ def main():
     else:
         IMAGE_DUMP_DIR = ""
 
-    # ---------------------------------------------------------------------------- Where image magick starts
-
-    # Need to hook in my cpp code pixelbasher into this script
-    # to generate the images for comparison.
-
     if args.image_dump == True:
-        print("Image dump directory: ", IMAGE_DUMP_DIR) # need to figure what to do/what justin did with image-dump stuff
+        print("Image dump directory: ", IMAGE_DUMP_DIR)
 
     # Where the pdf's will be converted to BMP's and deleted once used
     CONVERTED_DIR = os.path.join(base_dir, "converted")
@@ -1098,11 +1095,10 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        MS_ORIG,
-        "-resize", "75%",
+        f"{MS_ORIG}[0-{MAX_PAGES - 1}]",
+        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
-        "-background", "white",
         "-alpha", "remove",
         "-alpha", "on",
         CONVERTED_DIR + "/authoritative-page.bmp"
@@ -1112,11 +1108,10 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        LO_ORIG,
-        "-resize", "75%",
+        f"{LO_ORIG}[0-{MAX_PAGES - 1}]",
+        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
-        "-background", "white",
         "-alpha", "remove",
         "-alpha", "on",
         CONVERTED_DIR + "/import-page.bmp"
@@ -1126,11 +1121,10 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        MS_CONV,
-        "-resize", "75%",
+        f"{MS_CONV}[0-{MAX_PAGES - 1}]",
+        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
-        "-background", "white",
         "-alpha", "remove",
         "-alpha", "on",
         CONVERTED_DIR + "/import_mso-page.bmp"
@@ -1141,11 +1135,10 @@ def main():
         subprocess.run([
             "magick",
             "-density", str(args.resolution),
-            LO_PREV,
-            "-resize", "75%",
+            f"{LO_PREV}[0-{MAX_PAGES - 1}]",
+            "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
-            "-background", "white",
             "-alpha", "remove",
             "-alpha", "on",
             args.history_dir + "/import-page.bmp"
@@ -1156,11 +1149,10 @@ def main():
         subprocess.run([
             "magick",
             "-density", str(args.resolution),
-            MS_PREV,
-            "-resize", "75%",
+            f"{MS_PREV}[0-{MAX_PAGES - 1}]",
+            "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
-            "-background", "white",
             "-alpha", "remove",
             "-alpha", "on",
              args.history_dir + "/import_mso-page.bmp"
@@ -1200,7 +1192,6 @@ def main():
         [EXPORT_COMPARE_DIR] +
         [IMAGE_DUMP_DIR] +
         options,
-        #["false", str(args.minor_differences)], # options: 1st: diff mso_roundtrip files, 2nd: minor differences
         check=True
     )
 
