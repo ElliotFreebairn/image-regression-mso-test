@@ -39,7 +39,7 @@ BMP::BMP(const char *filename, std::string basename)
 	read(filename);
 	m_background_value = get_average_colour();
 	m_non_background_count = get_non_background_pixel_count(m_background_value);
-	m_blurred_edge_mask = blur_edge_mask(sobel_edges<30>());
+	m_blurred_edge_mask = blur_edge_mask(sobel_edges<15>());
 }
 
 void BMP::read(const char *filename)
@@ -218,7 +218,7 @@ int BMP::get_non_background_pixel_count(int background_value) const
 	{
 		std::uint8_t gray_value = m_data[i * 4]; // Assuming 32-bit BMP, gray value is in the first byte
 
-		if (std::abs(gray_value - background_value) > 20)
+		if (std::abs(gray_value - background_value) > 8)
 		{
 			non_background_count++;
 		}
@@ -266,7 +266,7 @@ std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
 			if (!edge_map[index])
 				continue;
 
-			blur_pixels<3>(x, y, width, height, blurred_mask);
+			blur_pixels<2>(x, y, width, height, blurred_mask);
 		}
 	}
 	return blurred_mask;

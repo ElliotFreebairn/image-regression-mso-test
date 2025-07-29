@@ -26,6 +26,7 @@ public:
 	{
 		RED,
 		YELLOW,
+		DARK_YELLOW,
 		BLUE,
 		GREEN
 	};

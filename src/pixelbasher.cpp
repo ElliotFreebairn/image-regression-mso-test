@@ -119,15 +119,19 @@ std::vector<bool> PixelBasher::get_intersection_mask(const BMP &original, const 
 
 std::array<std::uint8_t, pixel_stride> PixelBasher::compare_pixels(std::array<std::uint8_t, pixel_stride> original, std::array<std::uint8_t, pixel_stride> target, BMP &diff, bool near_edge, bool minor_differences)
 {
-	bool colour_differs = Pixel::differs_from(original, target, near_edge);
+	const bool differs = Pixel::differs_from(original, target, near_edge);
 
-	if (!colour_differs || (near_edge && !minor_differences))
+	if (!differs) {
+		if (minor_differences && near_edge && Pixel::differs_from(original, target, false)) {
+			diff.increment_red_count(1);
+			return colour_pixel(Colour::YELLOW);
+		}
 		return original;
+	}
 
-	if (near_edge && minor_differences)
-	{
+	if (near_edge) {
 		diff.increment_yellow_count(1);
-		return colour_pixel(Colour::YELLOW);
+		return colour_pixel(Colour::DARK_YELLOW);
 	}
 
 	diff.increment_red_count(1);
@@ -157,6 +161,8 @@ std::array<std::uint8_t, pixel_stride> PixelBasher::colour_pixel(Colour colour)
 	{
 	case Colour::YELLOW:
 		return {0, 197, 255, 255};
+	case Colour::DARK_YELLOW:
+		return {0, 128, 139, 255};
 	case Colour::RED:
 		return {0, 0, 255, 255};
 	case Colour::BLUE:
