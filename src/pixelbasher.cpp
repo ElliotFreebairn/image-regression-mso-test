@@ -23,6 +23,9 @@ BMP PixelBasher::compare_bmps(const BMP &original, const BMP &target, bool enabl
 	BMP diff(original);
 
 	std::vector<bool> intersection_mask = get_intersection_mask(original, target, min_width, min_height);
+	std::vector<bool> original_filtered_vertical_edges = original.get_vertical_edge_mask();
+	std::vector<bool> target_filtered_vertical_edges = target.get_vertical_edge_mask();
+
 	// The diff data is based on the base image, so we create a new data vector to hold the modified pixels
 	auto &original_data = original.get_data();
 	auto &target_data = target.get_data();
@@ -47,8 +50,14 @@ BMP PixelBasher::compare_bmps(const BMP &original, const BMP &target, bool enabl
 			std::array<std::uint8_t, pixel_stride> target_pixel = Pixel::get_vector(target_row);
 
 			bool near_edge = intersection_mask[mask_index];
+			bool vertical_edge = false;
 
-			std::array<std::uint8_t, pixel_stride> bgra = compare_pixels(original_pixel, target_pixel, diff, near_edge, enable_minor_differences);
+			if (original_filtered_vertical_edges[mask_index] || target_filtered_vertical_edges[mask_index])
+			{
+				vertical_edge = true;
+			}
+
+			std::array<std::uint8_t, pixel_stride> bgra = compare_pixels(original_pixel, target_pixel, diff, near_edge, vertical_edge, enable_minor_differences);
 
 			for (int i = 0; i < pixel_stride; i++)
 			{
@@ -117,7 +126,7 @@ std::vector<bool> PixelBasher::get_intersection_mask(const BMP &original, const 
 	return intersection_mask;
 }
 
-std::array<std::uint8_t, pixel_stride> PixelBasher::compare_pixels(std::array<std::uint8_t, pixel_stride> original, std::array<std::uint8_t, pixel_stride> target, BMP &diff, bool near_edge, bool minor_differences)
+std::array<std::uint8_t, pixel_stride> PixelBasher::compare_pixels(std::array<std::uint8_t, pixel_stride> original, std::array<std::uint8_t, pixel_stride> target, BMP &diff, bool near_edge, bool vertical_edge, bool minor_differences)
 {
 	const bool differs = Pixel::differs_from(original, target, near_edge);
 
@@ -129,9 +138,15 @@ std::array<std::uint8_t, pixel_stride> PixelBasher::compare_pixels(std::array<st
 		return original;
 	}
 
-	if (near_edge) {
+	if (vertical_edge)
+	{
 		diff.increment_yellow_count(1);
 		return colour_pixel(Colour::DARK_YELLOW);
+	}
+
+	if (near_edge) {
+		diff.increment_yellow_count(1);
+		return colour_pixel(Colour::YELLOW);
 	}
 
 	diff.increment_red_count(1);

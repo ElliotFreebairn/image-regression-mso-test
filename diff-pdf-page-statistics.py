@@ -1179,6 +1179,7 @@ def main():
     options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.no_save_overlay).lower(), str(args.minor_differences).lower()]
 
     # Run pixelbasher to compare differnces between MSO and LO PDF pages
+    subprocess.run(["make"], cwd=base_dir, check=True)
     subprocess.run(
         [PIXELBASHER_BIN] +
         [args.base_file] +
