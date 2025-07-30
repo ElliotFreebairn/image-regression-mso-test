@@ -40,8 +40,8 @@ struct ParsedArguments
 	bool ms_previous;
 };
 
-void write_stats_to_csv(const BMP &image1, const BMP &image2, const BMP &diff, int page_number, std::string basename,
-						std::string filename)
+void write_stats_to_csv(const BMP &base, const BMP &current, const BMP& previous, const BMP &diff, int page_number, std::string basename,
+						std::string filename, bool previous_exists)
 {
 	std::ofstream csv_file(filename);
 	if (!csv_file.is_open())
@@ -49,19 +49,30 @@ void write_stats_to_csv(const BMP &image1, const BMP &image2, const BMP &diff, i
 		throw std::runtime_error("Cannot open CSV file for writing");
 	}
 
-	double image1_total_pixels = image1.get_width() * image1.get_height();
-	double image2_total_pixels = image2.get_width() * image2.get_height();
+	double base_total_pixels = base.get_width() * base.get_height();
+	double current_total_pixels = current.get_width() * current.get_height();
 
 	csv_file << basename << ","
 			 << page_number << ","
-			 << image1_total_pixels << ","
-			 << image1.get_non_background_count() << ","
-			 << (static_cast<double>(image1.get_non_background_count()) / image1_total_pixels) << ","
-			 << image2_total_pixels << ","
-			 << image2.get_non_background_count() << ","
-			 << (static_cast<double>(image2.get_non_background_count()) / image2_total_pixels) << ","
+			 << base_total_pixels << ","
+			 << base.get_non_background_count() << ","
+			 << (static_cast<double>(base.get_non_background_count()) / base_total_pixels) << ","
+			 << current_total_pixels << ","
+			 << current.get_non_background_count() << ","
+			 << (static_cast<double>(current.get_non_background_count()) / current_total_pixels) << ","
 			 << diff.get_red_count() << ","
-			 << (static_cast<double>(diff.get_red_count()) / image2_total_pixels) << "\n";
+			 << (static_cast<double>(diff.get_red_count()) / current_total_pixels);
+
+	if (previous_exists)
+	{
+		double previous_total_pixels = previous.get_width() * previous.get_height();
+		csv_file << "," << previous_total_pixels << ","
+			<< previous.get_non_background_count() << ","
+			<< (static_cast<double>(previous.get_non_background_count()) / previous_total_pixels) << ","
+			<<	previous.get_red_count() << ","
+			<< (static_cast<double>(previous.get_red_count()) / previous_total_pixels);
+	}
+	csv_file << "\n";
 }
 
 void parse_flag(char *argv[], int &arg_index, bool &option, std::string option_name)
@@ -204,6 +215,8 @@ int main(int argc, char *argv[])
 			BMP lo_compare;
 			BMP ms_conv_compare;
 
+			std::string page_ext = std::to_string(i + 1) + ".bmp";
+
 			if (args.lo_previous)
 			{
 				lo_previous = args.lo_previous_images[i];
@@ -234,63 +247,63 @@ int main(int argc, char *argv[])
 
 			if (args.image_dump)
 			{
-				std::string output_path = args.image_dump_dir + "/" + args.basename + "_authoritative_original-" + std::to_string(i + 1) + ".bmp";
+				std::string output_path = args.image_dump_dir + "/" + args.basename + "_authoritative_original-" + page_ext;
 				base.write(output_path.c_str());
 
-				output_path = args.image_dump_dir +  "/" + args.basename + "_import-grayscale-" + std::to_string(i + 1) + ".bmp";
+				output_path = args.image_dump_dir +  "/" + args.basename + "_import-grayscale-" + page_ext;
 				lo.write(output_path.c_str());
 
-				output_path = args.image_dump_dir + "/" + args.basename + "_export-grayscale-" + std::to_string(i + 1) + ".bmp";
+				output_path = args.image_dump_dir + "/" + args.basename + "_export-grayscale-" + page_ext;
 				ms_conv.write(output_path.c_str());
 
-				output_path = args.image_dump_dir + "/" + args.basename + "_import-overlay-" + std::to_string(i + 1) + ".bmp";
+				output_path = args.image_dump_dir + "/" + args.basename + "_import-overlay-" + page_ext;
 				lo_diff.write(output_path.c_str());
 
-				output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + std::to_string(i + 1) + ".bmp";
+				output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + page_ext;
 				ms_conv_diff.write(output_path.c_str());
 
 				if (args.lo_previous)
 				{
-					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + page_ext;
 					lo_previous.write(output_path.c_str());
 
-					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + page_ext;
 					lo_previous_diff.write(output_path.c_str());
 
 
-					output_path = args.image_dump_dir + "/" +  args.basename + "_import-side-by-side-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" +  args.basename + "_import-side-by-side-" + page_ext;
 					BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
 				}
 				if (args.ms_previous)
 				{
-					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-grayscale-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-grayscale-" + page_ext;
 					ms_conv_previous.write(output_path.c_str());
 
-					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + page_ext;
 					ms_conv_previous_diff.write(output_path.c_str());
 
 
-					output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + page_ext;
 					BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
 				}
 			}
 
 			if (!args.no_save_overlay || force_save_import)
 			{
-				std::string output_path = args.import_dir + "/" + args.basename + "_import-" + std::to_string(i + 1) + ".bmp";
+				std::string output_path = args.import_dir + "/" + args.basename + "_import-" + page_ext;
 				lo_diff.write(output_path.c_str());
 
 				if (args.lo_previous)
 				{
-					output_path = args.import_dir + "/" + args.basename + "_prev-import-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.import_dir + "/" + args.basename + "_prev-import-" + page_ext;
 					lo_previous_diff.write(output_path.c_str());
 
-					output_path = args.import_compare_dir + "/" + args.basename + "_import-compare-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.import_compare_dir + "/" + args.basename + "_import-compare-" + page_ext;
 					lo_compare.write(output_path.c_str());
 
 					if (args.image_dump)
 					{
-						output_path = args.image_dump_dir + "/" +args.basename +  "_import-compare-" + std::to_string(i + 1) + ".bmp";
+						output_path = args.image_dump_dir + "/" +args.basename +  "_import-compare-" + page_ext;
 						lo_compare.write(output_path.c_str());
 					}
 				}
@@ -298,27 +311,27 @@ int main(int argc, char *argv[])
 
 			if (!args.no_save_overlay || force_save_export)
 			{
-				std::string output_path = args.export_dir + "/" + args.basename + "_export-" + std::to_string(i + 1) + ".bmp";
+				std::string output_path = args.export_dir + "/" + args.basename + "_export-" + page_ext;
 				ms_conv_diff.write(output_path.c_str());
 
 				if (args.ms_previous)
 				{
-					output_path = args.export_dir + "/" + args.basename + "_prev-export-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.export_dir + "/" + args.basename + "_prev-export-" + page_ext;
 					ms_conv_previous_diff.write(output_path.c_str());
 
-					output_path = args.export_compare_dir + "/" + args.basename + "_export-compare-" + std::to_string(i + 1) + ".bmp";
+					output_path = args.export_compare_dir + "/" + args.basename + "_export-compare-" + page_ext;
 					ms_conv_compare.write(output_path.c_str());
 
 					if (args.image_dump)
 					{
-						std::string output_path = args.image_dump_dir + "/" + args.basename + "_export-compare-" + std::to_string(i + 1) + ".bmp";
+						std::string output_path = args.image_dump_dir + "/" + args.basename + "_export-compare-" + page_ext;
 						ms_conv_compare.write(output_path.c_str());
 					}
 				}
 			}
 
-			write_stats_to_csv(base, lo, lo_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"));
-			write_stats_to_csv(base, ms_conv, ms_conv_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"));
+			write_stats_to_csv(base, lo, lo_diff, lo_previous_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"), args.lo_previous);
+			write_stats_to_csv(base, ms_conv, ms_conv_diff, ms_conv_previous_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"), args.ms_previous);
 		}
 	}
 	catch (const std::exception &e)
