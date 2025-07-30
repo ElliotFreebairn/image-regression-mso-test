@@ -262,6 +262,13 @@ int main(int argc, char *argv[])
 				output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + page_ext;
 				ms_conv_diff.write(output_path.c_str());
 
+
+				output_path = args.image_dump_dir + "/" +  args.basename + "_import-side-by-side-" + page_ext;
+				BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
+
+				output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + page_ext;
+				BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
+
 				if (args.lo_previous)
 				{
 					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + page_ext;
@@ -269,10 +276,6 @@ int main(int argc, char *argv[])
 
 					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + page_ext;
 					lo_previous_diff.write(output_path.c_str());
-
-
-					output_path = args.image_dump_dir + "/" +  args.basename + "_import-side-by-side-" + page_ext;
-					BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
 				}
 				if (args.ms_previous)
 				{
@@ -281,10 +284,6 @@ int main(int argc, char *argv[])
 
 					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + page_ext;
 					ms_conv_previous_diff.write(output_path.c_str());
-
-
-					output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + page_ext;
-					BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
 				}
 			}
 
