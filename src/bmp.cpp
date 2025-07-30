@@ -40,6 +40,7 @@ BMP::BMP(const char *filename, std::string basename)
 	m_background_value = get_average_colour();
 	m_non_background_count = get_non_background_pixel_count(m_background_value);
 	m_blurred_edge_mask = blur_edge_mask(sobel_edges<15>());
+	m_vertical_edges = filter_long_vertical_edge_runs(get_vertical_edges<15>(), 20);
 }
 
 BMP::BMP() {}
@@ -331,6 +332,68 @@ std::vector<bool> BMP::sobel_edges()
 		}
 	}
 	return result;
+}
+
+std::vector<bool> BMP::filter_long_vertical_edge_runs(const std::vector<bool>& vertical_edges, int min_run_length)
+{
+	std::vector<bool> result(vertical_edges.size(), false);
+	int width = m_info_header.width;
+	int height = m_info_header.height;
+
+	for (int x = 0; x < width; x++)
+	{
+		int run_start = -1;
+		int run_length = 0;
+
+		for (int y = 0; y < height; y++)
+		{
+			int index = y * width + x;
+			if (vertical_edges[index])
+			{
+				if (run_start == -1)
+				{
+					run_start = y;
+				}
+				run_length++;
+			} else {
+				if (run_length >= min_run_length)
+				{
+					// copy the run
+					for (int i = run_start; i < run_start + run_length; i++)
+					{
+						result[i * width + x] = true;
+					}
+				}
+				run_start = -1;
+				run_length = 0;
+			}
+		}
+	}
+	return result;
+}
+
+
+template<int Threshold>
+std::vector<bool> BMP::get_vertical_edges()
+{
+    std::int32_t width = m_info_header.width;
+    std::int32_t height = m_info_header.height;
+    const std::vector<std::uint8_t> &data = m_data;
+
+    std::vector<bool> result(width * height, false);
+
+    for (int y = 1; y < height - 1; y++)
+    {
+        for (int x = 1; x < width - 1; x++)
+        {
+            auto [g_x, g_y] = get_sobel_gradients(y, x, data, width);
+
+            int abs_gx = std::abs(g_x);
+
+            result[y * width + x] = (abs_gx >= Threshold);
+        }
+    }
+    return result;
 }
 
 template<int Radius> // compile-time constant

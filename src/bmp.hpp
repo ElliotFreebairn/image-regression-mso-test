@@ -57,6 +57,7 @@ public:
 
 	const std::vector<std::uint8_t> &get_data() const { return m_data; }
 	const std::vector<bool> &get_blurred_edge_mask() const { return m_blurred_edge_mask; }
+	const std::vector<bool> &get_vertical_edge_mask() const { return m_vertical_edges; }
 	int get_width() const { return m_info_header.width; }
 	int get_height() const { return m_info_header.height; }
 	int get_red_count() const { return m_red_count; }
@@ -74,6 +75,11 @@ private:
 
 	template<int Threshold>
 	std::vector<bool> sobel_edges();
+
+	template<int Threshold> // compile-time constant
+	std::vector<bool> get_vertical_edges();
+ 	std::vector<bool> filter_long_vertical_edge_runs(const std::vector<bool>& vertical_edges, int min_run_length);
+
 	static std::array<int, 2> get_sobel_gradients(int y, int x, const std::vector<std::uint8_t> &data, int width);
 
 	std::vector<bool> blur_edge_mask(const std::vector<bool> &edge_map);
@@ -86,6 +92,7 @@ private:
 
 	std::vector<std::uint8_t> m_data;
 	std::vector<bool> m_blurred_edge_mask;
+	std::vector<bool> m_vertical_edges;
 	int m_red_count = 0;
 	int m_yellow_count = 0;
 	int m_background_value = 0; // used to determine background colour
