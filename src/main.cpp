@@ -187,24 +187,29 @@ int main(int argc, char *argv[])
 
 		for (size_t i = 0; i < num_pages; i++)
 		{
-			// previous files
 			bool force_save_import = false;
 			bool force_save_export = false;
 
 			BMP base = args.ms_orig_images[i];
 			BMP lo = args.lo_images[i];
 			BMP ms_conv = args.ms_conv_images[i];
+			BMP lo_previous;
+			BMP ms_conv_previous;
 
 			BMP lo_diff = diff(pixel_basher, base, lo, args.enable_minor_differences);
 			BMP ms_conv_diff = diff(pixel_basher, base, ms_conv, args.enable_minor_differences);
+
 			BMP lo_previous_diff;
 			BMP ms_conv_previous_diff;
+			BMP lo_compare;
+			BMP ms_conv_compare;
 
 			if (args.lo_previous)
 			{
-				BMP lo_previous = args.lo_previous_images[i];
+				lo_previous = args.lo_previous_images[i];
 				lo_previous_diff = diff(pixel_basher, base, lo_previous, args.enable_minor_differences);
 
+				lo_compare = pixel_basher.compare_regressions(base, lo_diff, lo_previous_diff);
 				if (args.no_save_overlay) {
 					if (lo_diff.get_red_count() > lo_previous_diff.get_red_count())
 					{
@@ -215,9 +220,10 @@ int main(int argc, char *argv[])
 
 			if (args.ms_previous)
 			{
-				BMP ms_conv_previous = args.ms_conv_previous_images[i];
+				ms_conv_previous = args.ms_conv_previous_images[i];
 				ms_conv_previous_diff = diff(pixel_basher, base, ms_conv_previous, args.enable_minor_differences);
 
+				ms_conv_compare = pixel_basher.compare_regressions(base, ms_conv_diff, ms_conv_previous_diff);
 				if (args.no_save_overlay) {
 					if (ms_conv_diff.get_red_count() > ms_conv_previous_diff.get_red_count())
 					{
@@ -226,46 +232,87 @@ int main(int argc, char *argv[])
 				}
 			}
 
-			if (!args.no_save_overlay || force_save_import)
+			if (args.image_dump)
 			{
-				std::string base_lo_diff_path = args.import_dir + "/" + args.basename + "_import-page-" + std::to_string(i + 1) + ".bmp";
-				lo_diff.write(base_lo_diff_path.c_str());
+				std::string output_path = args.image_dump_dir + "/" + args.basename + "_authoritative_original-" + std::to_string(i + 1) + ".bmp";
+				base.write(output_path.c_str());
+
+				output_path = args.image_dump_dir +  "/" + args.basename + "_import-grayscale-" + std::to_string(i + 1) + ".bmp";
+				lo.write(output_path.c_str());
+
+				output_path = args.image_dump_dir + "/" + args.basename + "_export-grayscale-" + std::to_string(i + 1) + ".bmp";
+				ms_conv.write(output_path.c_str());
+
+				output_path = args.image_dump_dir + "/" + args.basename + "_import-overlay-" + std::to_string(i + 1) + ".bmp";
+				lo_diff.write(output_path.c_str());
+
+				output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + std::to_string(i + 1) + ".bmp";
+				ms_conv_diff.write(output_path.c_str());
 
 				if (args.lo_previous)
 				{
-					std::string lo_prev_diff_path = args.import_dir + "/" + args.basename + "_prev-import-page-" + std::to_string(i + 1) + ".bmp";
-					lo_previous_diff.write(lo_prev_diff_path.c_str());
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + std::to_string(i + 1) + ".bmp";
+					lo_previous.write(output_path.c_str());
 
-					std::string compare_path = args.import_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(i + 1) + ".bmp";
-					BMP lo_version_diff = pixel_basher.compare_regressions(base, lo_diff, lo_previous_diff);
-					lo_version_diff.write(compare_path.c_str());
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + std::to_string(i + 1) + ".bmp";
+					lo_previous_diff.write(output_path.c_str());
+
+
+					output_path = args.image_dump_dir + "/" +  args.basename + "_import-side-by-side-" + std::to_string(i + 1) + ".bmp";
+					BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
+				}
+				if (args.ms_previous)
+				{
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-grayscale-" + std::to_string(i + 1) + ".bmp";
+					ms_conv_previous.write(output_path.c_str());
+
+					output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + std::to_string(i + 1) + ".bmp";
+					ms_conv_previous_diff.write(output_path.c_str());
+
+
+					output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + std::to_string(i + 1) + ".bmp";
+					BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
+				}
+			}
+
+			if (!args.no_save_overlay || force_save_import)
+			{
+				std::string output_path = args.import_dir + "/" + args.basename + "_import-" + std::to_string(i + 1) + ".bmp";
+				lo_diff.write(output_path.c_str());
+
+				if (args.lo_previous)
+				{
+					output_path = args.import_dir + "/" + args.basename + "_prev-import-" + std::to_string(i + 1) + ".bmp";
+					lo_previous_diff.write(output_path.c_str());
+
+					output_path = args.import_compare_dir + "/" + args.basename + "_import-compare-" + std::to_string(i + 1) + ".bmp";
+					lo_compare.write(output_path.c_str());
 
 					if (args.image_dump)
 					{
-						std::string side_by_side_path = args.image_dump_dir + "/lo_comparison-page-" + std::to_string(i + 1) + ".bmp";
-						BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, side_by_side_path.c_str());
+						output_path = args.image_dump_dir + "/" +args.basename +  "_import-compare-" + std::to_string(i + 1) + ".bmp";
+						lo_compare.write(output_path.c_str());
 					}
 				}
 			}
 
 			if (!args.no_save_overlay || force_save_export)
 			{
-				std::string base_ms_conv_diff_path = args.export_dir + "/" + args.basename + "_export-page-" + std::to_string(i + 1) + ".bmp";
-				ms_conv_diff.write(base_ms_conv_diff_path.c_str());
+				std::string output_path = args.export_dir + "/" + args.basename + "_export-" + std::to_string(i + 1) + ".bmp";
+				ms_conv_diff.write(output_path.c_str());
 
 				if (args.ms_previous)
 				{
-					std::string prev_diff_path = args.export_dir + "/" + args.basename + "_prev-export-page-" + std::to_string(i + 1) + ".bmp";
-					ms_conv_previous_diff.write(prev_diff_path.c_str());
+					output_path = args.export_dir + "/" + args.basename + "_prev-export-" + std::to_string(i + 1) + ".bmp";
+					ms_conv_previous_diff.write(output_path.c_str());
 
-					std::string compare_path = args.export_compare_dir + "/" + args.basename + "_import-compare-page-" + std::to_string(i + 1) + ".bmp";
-					BMP version_diff = pixel_basher.compare_regressions(base, ms_conv_diff, ms_conv_previous_diff);
-					version_diff.write(compare_path.c_str());
+					output_path = args.export_compare_dir + "/" + args.basename + "_export-compare-" + std::to_string(i + 1) + ".bmp";
+					ms_conv_compare.write(output_path.c_str());
 
 					if (args.image_dump)
 					{
-						std::string side_by_side_path = args.image_dump_dir + "/ms_conv_comparison-page-" + std::to_string(i + 1) + ".bmp";
-						BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, side_by_side_path.c_str());
+						std::string output_path = args.image_dump_dir + "/" + args.basename + "_export-compare-" + std::to_string(i + 1) + ".bmp";
+						ms_conv_compare.write(output_path.c_str());
 					}
 				}
 			}
