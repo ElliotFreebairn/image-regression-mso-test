@@ -108,28 +108,57 @@ def main():
         or args.base_file == 'ooo52181-1.doc' # constantly appears as false positive: OLE
         or args.base_file == 'fdo34319-2.doc' # unusual font
         or args.base_file == 'fdo37926-1.doc' # unusual font
+        or args.base_file == 'fdo40768-1.doc' # unusual font
+        or args.base_file == 'fdo57780-1.doc' # unusual font
+        or args.base_file == 'fdo57780-2.doc' # unusual font
         or args.base_file == 'fdo58277-1.doc' # unusual font
+        or args.base_file == 'fdo75554-1.doc' # unusual font
         or args.base_file == 'fdo87036-1.doc' # unusual font
         or args.base_file == 'forum-en-16406.doc' # unusual font
         or args.base_file == 'forum-en-16407.doc' # unusual font
         or args.base_file == 'forum-en-17158.doc' # unusual font
         or args.base_file == 'forum-en-27403.doc' # unusual font
+        or args.base_file == 'forum-en-33131.doc' # unusual font
         or args.base_file == 'forum-en-37111.doc' # unusual font
         or args.base_file == 'forum-mso-en-3104.doc' # unusual font
+        or args.base_file == 'kde168878-2.doc' # unusual font
+        or args.base_file == 'moz715138-1.doc' # unusual font
+        or args.base_file == 'moz720706-2.doc' # unusual font
+        or args.base_file == 'moz906560-6.doc' # unusual font
+        or args.base_file == 'moz906560-7.doc' # unusual font
+        or args.base_file == 'novell672867-2.doc' # unusual font
         or args.base_file == 'ooo20105-2.doc' # unusual font
+        or args.base_file == 'ooo31674-1.doc' # unusual font
         or args.base_file == 'ooo34207-3.doc' # unusual font
+        or args.base_file == 'ooo34927-2.doc' # unusual font
         or args.base_file == 'ooo38158-1.doc' # unusual font
         or args.base_file == 'ooo38158-4.doc' # unusual font
         or args.base_file == 'ooo38158-5.doc' # unusual font
+        or args.base_file == 'ooo39597-1.doc' # unusual font
         or args.base_file == 'ooo43866-2.doc' # unusual font
         or args.base_file == 'ooo45085-2.doc' # unusual font
         or args.base_file == 'ooo32650-1.doc' # unusual font
+        or args.base_file == 'ooo45540-2.doc' # unusual font
+        or args.base_file == 'ooo58648-1.doc' # unusual font
+        or args.base_file == 'ooo62980-1.doc' # unusual font
+        or args.base_file == 'ooo71133-7.doc' # unusual font
         or args.base_file == 'ooo72915-1.doc' # unusual font
+        or args.base_file == 'ooo89390-1.doc' # unusual font
+        or args.base_file == 'ooo119620-1.doc' # unusual font
+        or args.base_file == 'ooo120016-6.doc' # unusual font
+        or args.base_file == 'ooo120898-1.doc' # unusual font
         or args.base_file == 'rhbz163105-1.doc' # unusual font
+        or args.base_file == 'rhbz1025755-2.doc' # unusual font
         or args.base_file == 'tdf89409-1.doc' # unusual font
+        or args.base_file == 'tdf92587-1.doc' # unusual font
         or args.base_file == 'tdf93695-1.doc' # unusual font
         or args.base_file == 'tdf95104-1.doc' # unusual font
         or args.base_file == 'tdf104544-1.doc' # unusual font
+        or args.base_file == 'tdf112359-4.doc' # unusual font
+        or args.base_file == 'tdf119599-1.doc' # unusual font
+        or args.base_file == 'tdf120358-2.doc' # unusual font
+        or args.base_file == 'tdf126298-2.doc' # unusual font
+        or args.base_file == 'tdf134458-1.doc' # unusual font
         or args.base_file == 'fdo39005-1.doc' # formula
         or args.base_file == 'fdo45284-2.doc' # formula
         or args.base_file == 'fdo45284-3.doc' # formula
@@ -456,10 +485,13 @@ def main():
         or args.base_file == 'rhbz164691-1.doc' # solid blue
         or args.base_file == 'rhbz173474-1.doc' # solid blue
         or args.base_file == 'rhbz183617-1.doc' # solid blue
+        or args.base_file == 'rhbz187202-1.doc' # solid blue
+        or args.base_file == 'rhbz187202-1.doc' # solid blue
         or args.base_file == 'tdf99072-1.doc' # solid blue
         #docx
         or args.base_file == 'forum-mso-en-1268.docx' # =rand()
         or args.base_file == 'ooo34927-2.docx' # excessively font dependent
+        or args.base_file == 'forum-mso-en-5852.docx' # extremely stupid document
         or args.base_file == 'rhbz862326-1.docx' # extremely stupid document
         or args.base_file == 'fdo44257-1.docx' # constantly appears as false positive: 10 page OLE fallback images
         or args.base_file == 'fdo77716-1.docx' # constantly appears as false positive: 10 page OLE fallback images
@@ -475,6 +507,7 @@ def main():
         or args.base_file == 'kde244358-1.docx' # OLE
         or args.base_file == 'tdf66581-4.docx' # OLE
         or args.base_file == 'tdf91093-1.docx' # OLE
+        or args.base_file == 'tdf98948-5.docx' # OLE
         or args.base_file == 'tdf103639-1.docx' # OLE
         or args.base_file == 'tdf104065-1.docx' # OLE
         or args.base_file == 'tdf109102-1.docx' # OLE
@@ -491,11 +524,17 @@ def main():
         or args.base_file == 'tdf98681-3.docx' # constantly appears as false positive
         or args.base_file == 'tdf120551-3.docx' # constantly appears as false positive
         or args.base_file == 'tdf120551-5.docx' # constantly appears as false positive
+        or args.base_file == 'abi12502-1.docx' # unusual font
         or args.base_file == 'abi13160-1.docx' # unusual font
         or args.base_file == 'fdo43028-1.docx' # unusual font
         or args.base_file == 'fdo65494-1.docx' # unusual font
         or args.base_file == 'fdo67087-2.docx' # unusual font
         or args.base_file == 'fdo74110-1.docx' # unusual font
+        or args.base_file == 'fdo75254-1.docx' # unusual font
+        or args.base_file == 'fdo83173-1.docx' # unusual font
+        or args.base_file == 'fdo88024-2.docx' # unusual font
+        or args.base_file == 'fdo88024-4.docx' # unusual font
+        or args.base_file == 'forum-en-28786.docx' # unusual font
         or args.base_file == 'forum-en-33446.docx' # unusual font
         or args.base_file == 'forum-es-369.docx' # unusual font
         or args.base_file == 'forum-mso-de-75152.docx' # unusual font
@@ -503,62 +542,113 @@ def main():
         or args.base_file == 'forum-mso-de-85674.docx' # unusual font
         or args.base_file == 'forum-mso-de-87364.docx' # unusual font
         or args.base_file == 'forum-mso-de-102385.docx' # unusual font
+        or args.base_file == 'forum-mso-de-102912.docx' # unusual font
         or args.base_file == 'forum-mso-de-106949.docx' # unusual font
         or args.base_file == 'forum-mso-de-113918.docx' # unusual font
         or args.base_file == 'forum-mso-de-122886.docx' # unusual font
         or args.base_file == 'forum-mso-en-635.docx' # unusual font
         or args.base_file == 'forum-mso-en-786.docx' # unusual font
         or args.base_file == 'forum-mso-en-2898.docx' # unusual font
+        or args.base_file == 'forum-mso-en-3280.docx' # unusual font
+        or args.base_file == 'forum-mso-en-3291.docx' # unusual font
+        or args.base_file == 'forum-mso-en-3549.docx' # unusual font
+        or args.base_file == 'forum-mso-en-3784.docx' # unusual font
+        or args.base_file == 'forum-mso-en-4335.docx' # unusual font
         or args.base_file == 'forum-mso-en-4865.docx' # unusual font
         or args.base_file == 'forum-mso-en-5670.docx' # unusual font
         or args.base_file == 'forum-mso-en-5678.docx' # unusual font
+        or args.base_file == 'forum-mso-en-5681.docx' # unusual font
+        or args.base_file == 'forum-mso-en-5682.docx' # unusual font
+        or args.base_file == 'forum-mso-en-5852.docx' # unusual font
         or args.base_file == 'forum-mso-en-5865.docx' # unusual font
         or args.base_file == 'forum-mso-en-7261.docx' # unusual font
+        or args.base_file == 'forum-mso-en-7924.docx' # unusual font
+        or args.base_file == 'forum-mso-en-7930.docx' # unusual font
+        or args.base_file == 'forum-mso-en-7931.docx' # unusual font
+        or args.base_file == 'forum-mso-en-7932.docx' # unusual font
         or args.base_file == 'forum-mso-en-9806.docx' # unusual font
+        or args.base_file == 'forum-mso-en-9865.docx' # unusual font
         or args.base_file == 'forum-mso-en-10349.docx' # unusual font
         or args.base_file == 'forum-mso-en-10431.docx' # unusual font
+        or args.base_file == 'forum-mso-en-10740.docx' # unusual font
         or args.base_file == 'forum-mso-en-10513.docx' # unusual font
         or args.base_file == 'forum-mso-en-10723.docx' # unusual font
         or args.base_file == 'forum-mso-en-10729.docx' # unusual font
         or args.base_file == 'forum-mso-en-10783.docx' # unusual font
+        or args.base_file == 'forum-mso-en-12482.docx' # unusual font
+        or args.base_file == 'forum-mso-en-12484.docx' # unusual font
         or args.base_file == 'forum-mso-en-12532.docx' # unusual font
+        or args.base_file == 'forum-mso-en-13283.docx' # unusual font
         or args.base_file == 'forum-mso-en-13515.docx' # unusual font
         or args.base_file == 'forum-mso-en-13800.docx' # unusual font
         or args.base_file == 'forum-mso-en-13874.docx' # unusual font
         or args.base_file == 'forum-mso-en-15345.docx' # unusual font
         or args.base_file == 'forum-mso-en-15535.docx' # unusual font
+        or args.base_file == 'forum-mso-en-15536.docx' # unusual font
+        or args.base_file == 'forum-mso-en-15617.docx' # unusual font
         or args.base_file == 'forum-mso-en-15688.docx' # unusual font
         or args.base_file == 'forum-mso-en-15689.docx' # unusual font
         or args.base_file == 'forum-mso-en-16276.docx' # unusual font
         or args.base_file == 'forum-mso-en-17027.docx' # unusual font
+        or args.base_file == 'forum-mso-en-17646.docx' # unusual font
+        or args.base_file == 'forum-mso-en-17584.docx' # unusual font
         or args.base_file == 'forum-mso-en-17656.docx' # unusual font
+        or args.base_file == 'forum-mso-en-17711.docx' # unusual font
         or args.base_file == 'forum-mso-en-18445.docx' # unusual font
+        or args.base_file == 'forum-mso-en-18680.docx' # unusual font
         or args.base_file == 'forum-mso-en-18727.docx' # unusual font
         or args.base_file == 'forum-mso-en-18740.docx' # unusual font
         or args.base_file == 'forum-mso-en3-11288.docx' # unusual font
         or args.base_file == 'forum-mso-en3-12276.docx' # unusual font
+        or args.base_file == 'forum-mso-en3-12661.docx' # unusual font
         or args.base_file == 'forum-mso-en3-21123.docx' # unusual font
         or args.base_file == 'forum-mso-en3-21703.docx' # unusual font
         or args.base_file == 'forum-mso-en4-265687.docx' # unusual font
         or args.base_file == 'forum-mso-en4-446134.docx' # unusual font
         or args.base_file == 'forum-mso-en4-450894.docx' # unusual font
         or args.base_file == 'forum-mso-en4-517662.docx' # unusual font
+        or args.base_file == 'forum-mso-en4-520929.docx' # unusual font
         or args.base_file == 'forum-mso-en4-673198.docx' # unusual font
         or args.base_file == 'forum-mso-en4-747862.docx' # unusual font
         or args.base_file == 'forum-mso-en4-754174.docx' # unusual font
         or args.base_file == 'forum-mso-en4-774984.docx' # unusual font
         or args.base_file == 'kde239393-1.docx' # unusual font
+        or args.base_file == 'kde407831-1.docx' # unusual font
+        or args.base_file == 'lp704461-1.docx' # unusual font
+        or args.base_file == 'moz627433-2.docx' # unusual font
+        or args.base_file == 'moz629829-7.docx' # unusual font
+        or args.base_file == 'moz631148-1.docx' # unusual font
+        or args.base_file == 'moz645210-1.docx' # unusual font
         or args.base_file == 'moz815635-2.docx' # unusual font
+        or args.base_file == 'moz819064-3.docx' # unusual font
+        or args.base_file == 'moz819444-2.docx' # unusual font
+        or args.base_file == 'moz919816-3.docx' # unusual font
         or args.base_file == 'moz919816-4.docx' # unusual font
+        or args.base_file == 'moz981909-1.docx' # unusual font
+        or args.base_file == 'moz1031624-8.docx' # unusual font
+        or args.base_file == 'moz1077723-1.docx' # unusual font
+        or args.base_file == 'moz1109522-2.docx' # unusual font
+        or args.base_file == 'moz1110663-2.docx' # unusual font
         or args.base_file == 'moz1564148-1.docx' # unusual font
+        or args.base_file == 'moz1602118-1.docx' # unusual font
+        or args.base_file == 'novell654875-1.docx' # unusual font
+        or args.base_file == 'ooo108708-1.docx' # unusual font
+        or args.base_file == 'ooo119813-1docx' # unusual font
         or args.base_file == 'ooo125270-2.docx' # unusual font
         or args.base_file == 'ooo125270-4.docx' # unusual font
         or args.base_file == 'ooo126928-1.docx' # unusual font
         or args.base_file == 'ooo127806-1.docx' # unusual font
+        or args.base_file == 'tdf57155-6.docx' # unusual font
         or args.base_file == 'tdf64991-1.docx' # unusual font
+        or args.base_file == 'tdf79838-1.docx' # unusual font
         or args.base_file == 'tdf85755-1.docx' # unusual font
         or args.base_file == 'tdf92642-1.docx' # unusual font
+        or args.base_file == 'tdf94163-1.docx' # unusual font
         or args.base_file == 'tdf96172-1.docx' # unusual font
+        or args.base_file == 'tdf99665-2.docx' # unusual font
+        or args.base_file == 'tdf100075-4.docx' # unusual font
+        or args.base_file == 'tdf102905-2.docx' # unusual font
+        or args.base_file == 'tdf102905-4.docx' # unusual font
         or args.base_file == 'tdf104162-1.docx' # unusual font
         or args.base_file == 'tdf106572-1.docx' # unusual font
         or args.base_file == 'tdf107928-1.docx' # unusual font
@@ -574,13 +664,22 @@ def main():
         or args.base_file == 'tdf118521-3.docx' # unusual font
         or args.base_file == 'tdf118521-4.docx' # unusual font
         or args.base_file == 'tdf121045-1.docx' # unusual font
+        or args.base_file == 'tdf123705-1.docx' # unusual font
         or args.base_file == 'tdf124091-1.docx' # unusual font
         or args.base_file == 'tdf124536-1.docx' # unusual font
+        or args.base_file == 'tdf124960-1.docx' # unusual font
+        or args.base_file == 'tdf125872-3.docx' # unusual font
         or args.base_file == 'tdf128373-1.docx' # unusual font
         or args.base_file == 'tdf129458-1.docx' # unusual font
         or args.base_file == 'tdf131225-1.docx' # unusual font
+        or args.base_file == 'tdf131651-1.docx' # unusual font
+        or args.base_file == 'tdf131651-2.docx' # unusual font
+        or args.base_file == 'tdf133238-1.docx' # unusual font
         or args.base_file == 'tdf133873-2.docx' # unusual font
         or args.base_file == 'tdf134235-1.docx' # unusual font
+        or args.base_file == 'tdf134671-1.docx' # unusual font
+        or args.base_file == 'tdf134771-1.docx' # unusual font
+        or args.base_file == 'tdf135444-1.docx' # unusual font
         or args.base_file == 'fdo32636-1.docx' # formulas seem to really undergo layout-in-motion, and the fall-back image often doesn't seem to match modern MSO.
         or args.base_file == 'fdo32636-3.docx' # formula
         or args.base_file == 'fdo44612-1.docx' # formula
@@ -613,12 +712,18 @@ def main():
         or args.base_file == 'tdf66525-1.docx' # formula
         or args.base_file == 'tdf66525-2.docx' # formula
         or args.base_file == 'tdf66525-3.docx' # formula
+        or args.base_file == 'tdf97164-1.docx' # formula
+        or args.base_file == 'tdf97166-1.docx' # formula
+        or args.base_file == 'tdf97166-3.docx' # formula
+        or args.base_file == 'tdf97166-5.docx' # formula
+        or args.base_file == 'tdf97166-6.docx' # formula
         or args.base_file == 'tdf79695-2.docx' # formula
         or args.base_file == 'tdf86716-4.docx' # formula
         or args.base_file == 'tdf95230-1.docx' # formula
         or args.base_file == 'tdf98886-1.docx' # formula
         or args.base_file == 'tdf100651-1.docx' # formula
         or args.base_file == 'tdf101378-1.docx' # formula
+        or args.base_file == 'tdf106859-1.docx' # formula
         or args.base_file == 'tdf112038-1.docx' # formula
         or args.base_file == 'tdf115030-2.docx' # formula
         or args.base_file == 'tdf116547-2.docx' # formula
@@ -826,6 +931,7 @@ def main():
         or args.base_file == 'tdf117031-1.docx' # date/time/temp-filename field
         or args.base_file == 'tdf117187-1.docx' # date/time/temp-filename field
         or args.base_file == 'tdf118156-7.docx' # date/time/temp-filename field
+        or args.base_file == 'tdf119886-1.docx' # date/time/temp-filename field
         or args.base_file == 'tdf130041-1.docx' # date/time/temp-filename field
         or args.base_file == 'tdf132475-1.docx' # date/time/temp-filename field
         or args.base_file == 'tdf134592-1.docx' # date/time/temp-filename field
@@ -847,8 +953,11 @@ def main():
         or args.base_file == 'forum-fr-16238.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-53497.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-54647.docx' # effective duplicate
+        or args.base_file == 'forum-mso-de-55642.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-56734.docx' # effective duplicate
+        or args.base_file == 'forum-mso-de-60837.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-67371.docx' # effective duplicate
+        or args.base_file == 'forum-mso-de-68703.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-71993.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-84324.docx' # effective duplicate
         or args.base_file == 'forum-mso-de-85093.docx' # effective duplicate
@@ -877,10 +986,14 @@ def main():
         or args.base_file == 'forum-mso-en-16076.docx' # effective duplicate
         or args.base_file == 'forum-mso-en-17298.docx' # effective duplicate
         or args.base_file == 'forum-mso-en-17995.docx' # effective duplicate
+        or args.base_file == 'forum-mso-en4-669069.docx' # effective duplicate
+        or args.base_file == 'forum-mso-en4-669103.docx' # effective duplicate
         or args.base_file == 'moz666767-2.docx' # effective duplicate
         or args.base_file == 'moz1007683-1.docx' # effective duplicate
         or args.base_file == 'moz1067887-1.docx' # effective duplicate
         or args.base_file == 'moz1196491-6.docx' # effective duplicate
+        or args.base_file == 'moz1390803-3.docx' # effective duplicate
+        or args.base_file == 'moz1390803-5.docx' # effective duplicate
         or args.base_file == 'novell348471-1.docx' # effective duplicate
         or args.base_file == 'novell492916-1.docx' # effective duplicate
         or args.base_file == 'novell498196-1.docx' # effective duplicate
@@ -896,11 +1009,13 @@ def main():
         or args.base_file == 'tdf112342-4.docx' # effective duplicate
         or args.base_file == 'tdf113788-1.docx' # effective duplicate
         or args.base_file == 'tdf117641-1.docx' # effective duplicate
+        or args.base_file == 'tdf118156-5.docx' # effective duplicate
         or args.base_file == 'tdf118169-2.docx' # effective duplicate
         or args.base_file == 'tdf118169-3.docx' # effective duplicate
         or args.base_file == 'tdf118377-1.docx' # effective duplicate
         or args.base_file == 'tdf119351-1.docx' # effective duplicate
         or args.base_file == 'tdf120163-4.docx' # effective duplicate
+        or args.base_file == 'tdf123104-1.docx' # effective duplicate
         or args.base_file == 'rhbz663619-2.docx' # gradient
         or args.base_file == 'forum-mso-en-4201.docx' # dark background
         or args.base_file == 'forum-mso-en3-12825.docx' # dark background
