@@ -1095,7 +1095,7 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        f"{MS_ORIG}[0-{MAX_PAGES - 1}]",
+        f"{MS_ORIG}",
         "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
@@ -1108,7 +1108,7 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        f"{LO_ORIG}[0-{MAX_PAGES - 1}]",
+        f"{LO_ORIG}",
         "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
@@ -1121,7 +1121,7 @@ def main():
     subprocess.run([
         "magick",
         "-density", str(args.resolution),
-        f"{MS_CONV}[0-{MAX_PAGES - 1}]",
+        f"{MS_CONV}",
         "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
@@ -1135,7 +1135,7 @@ def main():
         subprocess.run([
             "magick",
             "-density", str(args.resolution),
-            f"{LO_PREV}[0-{MAX_PAGES - 1}]",
+            f"{LO_PREV}",
             "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
@@ -1149,7 +1149,7 @@ def main():
         subprocess.run([
             "magick",
             "-density", str(args.resolution),
-            f"{MS_PREV}[0-{MAX_PAGES - 1}]",
+            f"{MS_PREV}",
             "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
@@ -1159,9 +1159,6 @@ def main():
         ])
 
 
-    base_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
-    PIXELBASHER_BIN = os.path.join(base_dir, "pixelbasher")
-    STAMP_DIR = os.path.join(base_dir, "stamps/")
 
     # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
     ms_orig_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
@@ -1170,15 +1167,60 @@ def main():
     lo_previous_pages = []
     ms_conv_previous_pages = []
 
-
     if IS_FILE_LO_PREV:
         lo_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import-*.bmp")))
     if IS_FILE_MS_PREV:
         ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import_mso*.bmp")))
 
-    options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.no_save_overlay).lower(), str(args.minor_differences).lower()]
+    # initially converted all pages to bmp's so we can collect these stats
+    with open('diff-pdf-' + file_ext[1][1:] + '-statistics-anomalies.csv', 'a') as f:
+        if IS_FILE_LO_PREV and len(lo_pages) != len(lo_previous_pages):
+            f.write(args.base_file + f",import,page count different form {args.history_dir} [{len(lo_previous_pages)}] and converted [{len(lo_pages)}]. Should be[{len(ms_orig_pages)}]" + '\n')
+        if IS_FILE_MS_PREV and len(ms_conv_pages) != len(ms_conv_previous_pages):
+            f.write(args.base_file + f",export,page count different form {args.history_dir} [{len(ms_conv_previous_pages)}] and converted [{len(ms_conv_pages)}]. Should be[{len(ms_orig_pages)}]" + '\n')
+        if len(lo_pages) != len(ms_orig_pages):
+            f.write(args.base_file + f",import, absolute page count, {len(lo_pages)}, should be, {len(ms_orig_pages)}" + '\n')
+        if len(ms_conv_pages) != len(ms_orig_pages):
+            f.write(args.base_file + f",export, absolute page count, {len(ms_conv_pages)}, should be, {len(ms_orig_pages)}" + '\n')
+
+
+    # if there a mismtach in the number of pages, get the lowest number of pages from the pdf's, so no error will be thrown
+    min_page_count = min(len(ms_orig_pages), len(lo_pages), len(ms_conv_pages))
+    if IS_FILE_LO_PREV:
+        min_page_count = min(len(lo_previous_pages), min_page_count)
+    if IS_FILE_MS_PREV:
+        min_page_count = min(len(ms_conv_previous_pages), min_page_count)
+    min_page_count = min(MAX_PAGES, min_page_count)
+
+    # remove any pages from each set which are above the min_page threshold
+    for page in ms_orig_pages[min_page_count:]:
+        os.remove(page)
+    ms_orig_pages = ms_orig_pages[:min_page_count]
+
+    for page in lo_pages[min_page_count:]:
+        os.remove(page)
+    lo_pages = lo_pages[:min_page_count]
+
+    for page in ms_conv_pages[min_page_count:]:
+        os.remove(page)
+    ms_conv_pages = ms_conv_pages[:min_page_count]
+
+    if IS_FILE_LO_PREV:
+        for page in lo_previous_pages[min_page_count:]:
+            os.remove(page)
+        lo_previous_pages = lo_previous_pages[:min_page_count]
+
+    if IS_FILE_MS_PREV:
+        for page in ms_conv_previous_pages[min_page_count:]:
+            os.remove(page)
+        ms_conv_previous_pages = ms_conv_previous_pages[:min_page_count]
 
     try:
+        base_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
+        PIXELBASHER_BIN = os.path.join(base_dir, "pixelbasher")
+        STAMP_DIR = os.path.join(base_dir, "stamps/")
+
+        options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.no_save_overlay).lower(), str(args.minor_differences).lower()]
         # Run pixelbasher to compare differences between MSO and LO PDF pages
         subprocess.run(
             [PIXELBASHER_BIN] +
