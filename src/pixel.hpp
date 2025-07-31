@@ -18,7 +18,7 @@
 
 
 #include "bmp.hpp"
-
+using PixelValues = std::array<std::uint8_t, pixel_stride>;
 struct Pixel
 {
 	std::uint8_t blue{0};
@@ -26,20 +26,20 @@ struct Pixel
 	std::uint8_t red{0};
 	std::uint8_t alpha{0};
 
-	static std::array<std::uint8_t, pixel_stride> get_vector(const std::uint8_t* src_row)
+	static PixelValues get_bgra(const std::uint8_t* src_row)
 	{
 		return {src_row[0], src_row[1], src_row[2], src_row[3]};
 	}
 
 	// Compare this pixel with another pixel and return true if they differ
-	static bool differs_from(std::array<std::uint8_t, 4> original, std::array<std::uint8_t, 4> target, bool near_edge, int threshold = 40)
+	static bool differs_from(PixelValues original, PixelValues target, bool near_edge, int threshold = 40)
 	{
 		int avg_diff = std::abs(original[2] - target[2]);
 		threshold = near_edge ? 180 : threshold;
 		return avg_diff > threshold;
 	}
 
-	static bool is_red(std::array<uint8_t, pixel_stride> pixel)
+	static bool is_red(PixelValues pixel)
 	{
 		return pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 255;
 	}
