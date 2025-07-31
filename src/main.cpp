@@ -247,47 +247,6 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (args.image_dump)
-            {
-                std::string output_path = args.image_dump_dir + "/" + args.basename + "_authoritative_original-" + page_ext;
-                base.write(output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_import-grayscale-" + page_ext;
-                lo.write(output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_export-grayscale-" + page_ext;
-                ms_conv.write(output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_import-overlay-" + page_ext;
-                lo_diff.write(output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + page_ext;
-                ms_conv_diff.write(output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_import-side-by-side-" + page_ext;
-                BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
-
-                output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + page_ext;
-                BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
-
-                if (args.lo_previous)
-                {
-                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + page_ext;
-                    lo_previous.write(output_path.c_str());
-
-                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + page_ext;
-                    lo_previous_diff.write(output_path.c_str());
-                }
-                if (args.ms_previous)
-                {
-                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-grayscale-" + page_ext;
-                    ms_conv_previous.write(output_path.c_str());
-
-                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + page_ext;
-                    ms_conv_previous_diff.write(output_path.c_str());
-                }
-            }
-
             if (!args.no_save_overlay || force_save_import)
             {
                 std::string output_path = args.import_dir + "/" + args.basename + "_import-" + page_ext;
@@ -327,6 +286,47 @@ int main(int argc, char *argv[])
                         std::string output_path = args.image_dump_dir + "/" + args.basename + "_export-compare-" + page_ext;
                         ms_conv_compare.write(output_path.c_str());
                     }
+                }
+            }
+
+            if (args.image_dump)
+            {
+                std::string output_path = args.image_dump_dir + "/" + args.basename + "_authoritative_original-" + page_ext;
+                base.write(output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_import-grayscale-" + page_ext;
+                lo.write(output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_export-grayscale-" + page_ext;
+                ms_conv.write(output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_import-overlay-" + page_ext;
+                lo_diff.write(output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_export-overlay-" + page_ext;
+                ms_conv_diff.write(output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_import-side-by-side-" + page_ext;
+                BMP::write_side_by_side(lo_diff, base, lo, args.stamp_dir, output_path.c_str());
+
+                output_path = args.image_dump_dir + "/" + args.basename + "_export-side-by-side-" + page_ext;
+                BMP::write_side_by_side(ms_conv_diff, base, ms_conv, args.stamp_dir, output_path.c_str());
+
+                if (args.lo_previous)
+                {
+                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-grayscale-" + page_ext;
+                    lo_previous.write(output_path.c_str());
+
+                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-import-overlay-" + page_ext;
+                    lo_previous_diff.write(output_path.c_str());
+                }
+                if (args.ms_previous)
+                {
+                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-grayscale-" + page_ext;
+                    ms_conv_previous.write(output_path.c_str());
+
+                    output_path = args.image_dump_dir + "/" + args.basename + "_prev-export-overlay-" + page_ext;
+                    ms_conv_previous_diff.write(output_path.c_str());
                 }
             }
 
