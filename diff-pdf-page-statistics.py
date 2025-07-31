@@ -1178,40 +1178,47 @@ def main():
 
     options = [str(IS_FILE_LO_PREV).lower(), str(IS_FILE_MS_PREV).lower(), str(args.image_dump).lower(), str(args.no_save_overlay).lower(), str(args.minor_differences).lower()]
 
-    # Run pixelbasher to compare differnces between MSO and LO PDF pages
-    subprocess.run(["make"], cwd=base_dir, check=True)
-    subprocess.run(
-        [PIXELBASHER_BIN] +
-        [args.base_file] +
-        ms_orig_pages +
-        lo_pages +
-        ms_conv_pages +
-        lo_previous_pages +
-        ms_conv_previous_pages +
-        [IMPORT_DIR] +
-        [EXPORT_DIR] +
-        [IMPORT_COMPARE_DIR] +
-        [EXPORT_COMPARE_DIR] +
-        [IMAGE_DUMP_DIR] +
-        [STAMP_DIR] +
-        options,
-        check=True
-    )
+    try:
+        # Run pixelbasher to compare differnces between MSO and LO PDF pages
+        subprocess.run(["make"], cwd=base_dir, check=True)
+        subprocess.run(
+            [PIXELBASHER_BIN] +
+            [args.base_file] +
+            ms_orig_pages +
+            lo_pages +
+            ms_conv_pages +
+            lo_previous_pages +
+            ms_conv_previous_pages +
+            [IMPORT_DIR] +
+            [EXPORT_DIR] +
+            [IMPORT_COMPARE_DIR] +
+            [EXPORT_COMPARE_DIR] +
+            [IMAGE_DUMP_DIR] +
+            [STAMP_DIR] +
+            options,
+            check=True
+        )
+    except subprocess.CalledProcessError as e:
+        print("Pixelbasher program failed with this code", e.returncode)
+        print("Command", e.cmd)
+    except Exception as e:
+        print("An exception has occured with the Pixelbasher program", e)
 
-    for page in ms_orig_pages:
-        os.remove(page)
-    for page in lo_pages:
-        os.remove(page)
-    for page in ms_conv_pages:
-        os.remove(page)
-
-    if IS_FILE_LO_PREV:
-        for page in lo_previous_pages:
+    finally:
+        for page in ms_orig_pages:
+            os.remove(page)
+        for page in lo_pages:
+            os.remove(page)
+        for page in ms_conv_pages:
             os.remove(page)
 
-    if IS_FILE_MS_PREV:
-        for page in ms_conv_previous_pages:
-            os.remove(page)
+        if IS_FILE_LO_PREV:
+            for page in lo_previous_pages:
+                os.remove(page)
+
+        if IS_FILE_MS_PREV:
+            for page in ms_conv_previous_pages:
+                os.remove(page)
 
 if __name__ == "__main__":
     main()
