@@ -30,4 +30,10 @@ check:
 	echo "Test passed" || echo "Test failed"
 
 clean:
-	rm -fr $(OBJ_DIR) $(TARGET)
+	rm -fr $(OBJ_DIR) \
+		$(TARGET) \
+		./*.csv \
+		converted/export \
+		converted/export-compare \
+		converted/import \
+		converted/import-compare
