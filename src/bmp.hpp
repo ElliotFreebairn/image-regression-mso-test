@@ -48,7 +48,7 @@ constexpr int pixel_stride = 4;
 class BMP
 {
 public:
-	BMP(const char *filename, std::string basename);
+	BMP(const char *filename);
 	BMP();
 	void read(const char *filename);
 	void write(const char *filename);

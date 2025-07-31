@@ -110,11 +110,11 @@ void parse_directories(int &arg_index, char *argv[], ParsedArguments &args)
 	args.import_dir = argv[--arg_index];
 }
 
-void parse_image_group(char *argv[], int start, int pages, std::vector<BMP> &images, const std::string &basename)
+void parse_image_group(char *argv[], int start, int pages, std::vector<BMP> &images)
 {
 	for (int i = 0; i < pages; i++)
 	{
-		images.push_back(BMP(argv[start + i], basename));
+		images.push_back(BMP(argv[start + i]));
 	}
 }
 
@@ -153,24 +153,24 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
 	int num_pages = num_image_args / pdf_count;
 	int offset = 2;
 
-	parse_image_group(argv, offset, num_pages, args.ms_orig_images, args.basename);
+	parse_image_group(argv, offset, num_pages, args.ms_orig_images);
 	offset += num_pages;
 
-	parse_image_group(argv, offset, num_pages, args.lo_images, args.basename);
+	parse_image_group(argv, offset, num_pages, args.lo_images);
 	offset += num_pages;
 
-	parse_image_group(argv, offset, num_pages, args.ms_conv_images, args.basename);
+	parse_image_group(argv, offset, num_pages, args.ms_conv_images);
 	offset += num_pages;
 
 	if (args.lo_previous)
 	{
-		parse_image_group(argv, offset, num_pages, args.lo_previous_images, args.basename);
+		parse_image_group(argv, offset, num_pages, args.lo_previous_images);
 		offset += num_pages;
 	}
 
 	if (args.ms_previous)
 	{
-		parse_image_group(argv, offset, num_pages, args.ms_conv_previous_images, args.basename);
+		parse_image_group(argv, offset, num_pages, args.ms_conv_previous_images);
 		offset += num_pages;
 	}
 	return args;
