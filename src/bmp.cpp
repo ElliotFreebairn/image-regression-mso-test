@@ -34,7 +34,7 @@ const static BMPColourHeader colour_header = {
 };
 
 
-BMP::BMP(const char *filename, std::string basename)
+BMP::BMP(const char *filename)
 {
 	read(filename);
 	m_background_value = get_average_colour();
@@ -168,9 +168,9 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
 	std::string ms_office_location = stamp_location + "/ms-office.bmp";
 	std::string cool_location = stamp_location + "/cool.bmp";
 
-	BMP diff_stamp(diff_location.c_str(), "diff");
-    BMP ms_office_stamp(ms_office_location.c_str(), "office");
-    BMP cool_stamp(cool_location.c_str(), "cool");
+	BMP diff_stamp(diff_location.c_str());
+    BMP ms_office_stamp(ms_office_location.c_str());
+    BMP cool_stamp(cool_location.c_str());
 
     diff.stamp_name(diff_stamp);
     base.stamp_name(ms_office_stamp);
