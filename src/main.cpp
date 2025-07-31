@@ -176,7 +176,7 @@ ParsedArguments parse_arguments(int argc, char *argv[], int pdf_count = 3)
     return args;
 }
 
-BMP diff(PixelBasher &pixel_basher, BMP &base, BMP &target, bool allow_minor_diffs /*const std::string &output_path */)
+BMP diff(PixelBasher &pixel_basher, BMP &base, BMP &target, bool allow_minor_diffs)
 {
     BMP diff = pixel_basher.compare_bmps(base, target, allow_minor_diffs);
     return diff;

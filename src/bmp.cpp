@@ -167,7 +167,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
 
     std::vector<std::uint8_t> combined_data(alligned_stride * height, 0);
 
-    // stamping/labelling the images for better differnetiation
+    // stamping/labelling the images for better differentiation
     std::string diff_location = stamp_location + "/diff.bmp";
     std::string ms_office_location = stamp_location + "/ms-office.bmp";
     std::string cool_location = stamp_location + "/cool.bmp";
@@ -312,7 +312,7 @@ std::vector<bool> BMP::blur_edge_mask(const std::vector<bool> &edge_map)
     return blurred_mask;
 }
 
-template <int Threshold> // compile-time constant
+template <int Threshold>
 std::vector<bool> BMP::sobel_edges()
 {
     std::int32_t width = m_info_header.width;
@@ -400,7 +400,7 @@ std::vector<bool> BMP::get_vertical_edges()
     return result;
 }
 
-template <int Radius> // compile-time constant
+template <int Radius>
 void BMP::blur_pixels(int x, int y, int width, int height, std::vector<bool> &mask)
 {
     for (int dy = -Radius; dy <= Radius; dy++)
