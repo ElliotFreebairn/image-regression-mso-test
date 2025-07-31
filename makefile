@@ -16,7 +16,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 -include $(OBJS:.o=.d)
 
-check:
+.PHONY: check clean
+check: $(TARGET)
 	mkdir -p test/output ./converted/import ./converted/import-compare  ./converted/export ./converted/export-compare
 	rm -rf converted/import converted/import-compare converted/export converted/export-compare
 	echo "Running test with python script"
