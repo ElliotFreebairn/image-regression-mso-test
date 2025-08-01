@@ -51,8 +51,7 @@ def main():
     parser.add_argument("--history_dir", default=".")
     parser.add_argument("--max_page", default="10") # limit PDF comparison to the first ten pages
     parser.add_argument("--no_save_overlay", action="store_true") # default is false
-    parser.add_argument("--resolution", default="200") # default is 200 DPI
-    parser.add_argument("--resize", default="75") # deafult is 75 %
+    parser.add_argument("--resolution", default="125") # default is 125 DPI
     parser.add_argument("--debug", action="store_true") # default is false
     parser.add_argument("--image_dump", action="store_true") # default is false
     parser.add_argument("--minor_differences", default="false") # default is false
@@ -60,7 +59,6 @@ def main():
 
     DEBUG = args.debug
     MAX_PAGES = int(args.max_page)
-    resize_percentage = f'{args.resize}%'
 
     # Exclude notorious false positives that have no redeeming value in constantly brought to the attention of QA
     if (
@@ -1091,12 +1089,12 @@ def main():
     CONVERTED_DIR = os.path.join(base_dir, "converted")
     HISTORY_DIR = args.history_dir
 
+    resolution = int(args.resolution) // 2
     # Convert the MSO PDF to bmp's
     subprocess.run([
         "magick",
-        "-density", str(args.resolution),
+        "-density", str(resolution),
         f"{MS_ORIG}",
-        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-alpha", "remove",
@@ -1107,9 +1105,8 @@ def main():
     # Convert the LO PDF to bmp's
     subprocess.run([
         "magick",
-        "-density", str(args.resolution),
+        "-density", str(resolution),
         f"{LO_ORIG}",
-        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-alpha", "remove",
@@ -1120,9 +1117,8 @@ def main():
     # Convert the MSO Roundtripped PDF's to BMP's
     subprocess.run([
         "magick",
-        "-density", str(args.resolution),
+        "-density", str(resolution),
         f"{MS_CONV}",
-        "-resize", resize_percentage,
         "-colorspace", "Gray",
         "-define", "bmp:format=bmp4",
         "-alpha", "remove",
@@ -1134,9 +1130,8 @@ def main():
     if IS_FILE_LO_PREV:
         subprocess.run([
             "magick",
-            "-density", str(args.resolution),
+            "-density", str(resolution),
             f"{LO_PREV}",
-            "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
             "-alpha", "remove",
@@ -1148,9 +1143,8 @@ def main():
     if IS_FILE_MS_PREV:
         subprocess.run([
             "magick",
-            "-density", str(args.resolution),
+            "-density", str(resolution),
             f"{MS_PREV}",
-            "-resize", resize_percentage,
             "-colorspace", "Gray",
             "-define", "bmp:format=bmp4",
             "-alpha", "remove",
