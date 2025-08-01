@@ -1127,7 +1127,7 @@ def main():
         "-define", "bmp:format=bmp4",
         "-alpha", "remove",
         "-alpha", "on",
-        CONVERTED_DIR + "/import_mso-page.bmp"
+        CONVERTED_DIR + "/export-page.bmp"
     ])
 
     # Convert to the previous LO PDF's to BMP's
@@ -1155,7 +1155,7 @@ def main():
             "-define", "bmp:format=bmp4",
             "-alpha", "remove",
             "-alpha", "on",
-             args.history_dir + "/import_mso-page.bmp"
+             args.history_dir + "/export-page.bmp"
         ])
 
 
@@ -1163,14 +1163,14 @@ def main():
     # Sorting pages o ensure that pages are compared in the same order, eg, auth-page 1 with import-page 1, etc...
     ms_orig_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "authoritative-*.bmp")))
     lo_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import-*.bmp")))
-    ms_conv_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "import_mso*.bmp")))
+    ms_conv_pages = sorted(glob.glob(os.path.join(CONVERTED_DIR, "export-*.bmp")))
     lo_previous_pages = []
     ms_conv_previous_pages = []
 
     if IS_FILE_LO_PREV:
         lo_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import-*.bmp")))
     if IS_FILE_MS_PREV:
-        ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "import_mso*.bmp")))
+        ms_conv_previous_pages = sorted(glob.glob(os.path.join(HISTORY_DIR, "export-*.bmp")))
 
     # initially converted all pages to bmp's so we can collect these stats
     with open('diff-pdf-' + file_ext[1][1:] + '-statistics-anomalies.csv', 'a') as f:
