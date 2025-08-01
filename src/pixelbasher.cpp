@@ -146,10 +146,8 @@ PixelValues PixelBasher::compare_pixels(PixelValues original, PixelValues target
         return colour_pixel(Colour::DARK_YELLOW);
     }
 
-    if (near_edge)
-    {
-        diff.increment_yellow_count(1);
-        return colour_pixel(Colour::YELLOW);
+    if (near_edge) {
+        return original;
     }
 
     diff.increment_red_count(1);

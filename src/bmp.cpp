@@ -37,8 +37,8 @@ BMP::BMP(const char *filename)
     read(filename);
     m_background_value = get_average_colour();
     m_non_background_count = get_non_background_pixel_count(m_background_value);
-    m_blurred_edge_mask = blur_edge_mask(sobel_edges<15>());
-    m_vertical_edges = filter_long_vertical_edge_runs(get_vertical_edges<15>(), 20);
+    m_blurred_edge_mask = blur_edge_mask(sobel_edges<245>());
+    m_vertical_edges = filter_long_vertical_edge_runs(get_vertical_edges<245>(), 15);
 }
 
 BMP::BMP() {}
@@ -120,6 +120,27 @@ void BMP::write(const char *filename)
             output.write(reinterpret_cast<char *>(padding.data()), padding_size);
         }
     }
+}
+
+void BMP::write_with_filter(const char *filename, std::vector<bool> filter_mask)
+{
+    for (int y = 0; y < m_info_header.height; y++)
+    {
+        for (int x = 0; x < m_info_header.width; x++)
+        {
+            int index = y * m_info_header.width + x;
+            int byte_index = index * 4;
+
+            if (filter_mask[index])
+            {
+                m_data[byte_index + 0] = 0;
+                m_data[byte_index + 1] = 0;
+                m_data[byte_index + 2] = 255;
+                m_data[byte_index + 3] = 255;
+            }
+        }
+    }
+    write(filename);
 }
 
 void BMP::stamp_name(BMP &stamp)

@@ -332,6 +332,16 @@ int main(int argc, char *argv[])
 
             write_stats_to_csv(base, lo, lo_diff, lo_previous_diff, i + 1, args.basename, (csv_filename + "-import-statistics.csv"), args.lo_previous);
             write_stats_to_csv(base, ms_conv, ms_conv_diff, ms_conv_previous_diff, i + 1, args.basename, (csv_filename + "-export-statistics.csv"), args.ms_previous);
+
+            // for debugging
+            // std::string filter_path = args.import_dir + "/" + args.basename + "_import-vertical-edges" + page_ext;
+            // lo.write_with_filter(filter_path.c_str(), lo.get_vertical_edge_mask());
+
+            // filter_path = args.import_dir + "/" + args.basename + "_import-blurred-edges" + page_ext;
+            // lo.write_with_filter(filter_path.c_str(), lo.get_blurred_edge_mask());
+
+            // filter_path = args.import_dir + "/" + args.basename + "_origin-vertical-edges" + page_ext;
+            // base.write_with_filter(filter_path.c_str(), base.get_vertical_edge_mask());
         }
     }
     catch (const std::exception &e)
