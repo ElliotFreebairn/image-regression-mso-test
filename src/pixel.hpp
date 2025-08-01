@@ -31,11 +31,22 @@ struct Pixel
     }
 
     // Compare this pixel with another pixel and return true if they differ
-    static bool differs_from(PixelValues original, PixelValues target, bool near_edge, int threshold = 40)
+    static bool differs_from(PixelValues original, PixelValues target, int background_value, bool near_edge, int threshold = 40)
     {
-        int avg_diff = std::abs(original[2] - target[2]);
-        threshold = near_edge ? 180 : threshold;
-        return avg_diff > threshold;
+        int gray_original = original[0];
+        int gray_target = target[0];
+        int gray_diff = std::abs(gray_original - gray_target);
+        int from_background = std::abs(gray_original - background_value);
+
+        if (from_background < 15) {
+            threshold += 20; // likely that it's just noise
+        }
+
+        if (near_edge) {
+            threshold += 50;
+        }
+
+        return gray_diff > threshold;
     }
 
     static bool is_red(PixelValues pixel)
