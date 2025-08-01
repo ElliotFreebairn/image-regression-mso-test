@@ -186,10 +186,6 @@ void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target
     BMP ms_office_stamp(ms_office_location.c_str());
     BMP cool_stamp(cool_location.c_str());
 
-    std::vector<std::uint8_t> diff_data = diff.get_data();
-    std::vector<std::uint8_t> base_data = base.get_data();
-    std::vector<std::uint8_t> target_data = target.get_data();
-
     BMP diff_copy(diff);
     BMP base_copy(base);
     BMP target_copy(target);
