@@ -148,8 +148,18 @@ void BMP::stamp_name(BMP &stamp)
     }
 }
 
-void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stamp_location, const char *filename)
+void BMP::write_side_by_side(const BMP &diff, const BMP &base, const BMP &target, std::string stamp_location, const char *filename)
 {
+    if (diff.get_height() != base.get_height() || base.get_height() != target.get_height() ||
+        diff.get_width() != base.get_width() || base.get_width() != target.get_width())
+    {
+        std::cerr << "Warning: Image dimensions don't match. Skipping side-by-side output for " << filename << std::endl;
+        std::cerr << "Diff: " << diff.get_width() << "x" << diff.get_height() << std::endl;
+        std::cerr << "Base: " << base.get_width() << "x" << base.get_height() << std::endl;
+        std::cerr << "Target: " << target.get_width() << "x" << target.get_height() << std::endl;
+        return;
+    }
+
     std::ofstream output{filename, std::ios_base::binary};
     if (!output)
     {
@@ -176,9 +186,17 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
     BMP ms_office_stamp(ms_office_location.c_str());
     BMP cool_stamp(cool_location.c_str());
 
-    diff.stamp_name(diff_stamp);
-    base.stamp_name(ms_office_stamp);
-    target.stamp_name(cool_stamp);
+    std::vector<std::uint8_t> diff_data = diff.get_data();
+    std::vector<std::uint8_t> base_data = base.get_data();
+    std::vector<std::uint8_t> target_data = target.get_data();
+
+    BMP diff_copy(diff);
+    BMP base_copy(base);
+    BMP target_copy(target);
+
+    diff_copy.stamp_name(diff_stamp);
+    base_copy.stamp_name(ms_office_stamp);
+    target_copy.stamp_name(cool_stamp);
 
     for (int y = 0; y < height; ++y)
     {
@@ -187,7 +205,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
 
         int src_width = diff.get_width();
         std::size_t src_row_stride = src_width * bytes_per_pixel;
-        const std::vector<std::uint8_t> &src_data = diff.get_data();
+        const std::vector<std::uint8_t> &src_data = diff_copy.get_data();
         const std::uint8_t *src_row = &src_data[y * src_row_stride];
 
         for (int x = 0; x < src_width; ++x)
@@ -201,7 +219,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
 
         src_width = base.get_width();
         src_row_stride = src_width * bytes_per_pixel;
-        const std::vector<std::uint8_t> &base_data = base.get_data();
+        const std::vector<std::uint8_t> &base_data = base_copy.get_data();
         const std::uint8_t *base_row = &base_data[y * src_row_stride];
 
         for (int x = 0; x < src_width; ++x)
@@ -215,7 +233,7 @@ void BMP::write_side_by_side(BMP &diff, BMP &base, BMP &target, std::string stam
 
         src_width = base.get_width();
         src_row_stride = src_width * bytes_per_pixel;
-        const std::vector<std::uint8_t> &target_data = target.get_data();
+        const std::vector<std::uint8_t> &target_data = target_copy.get_data();
         const std::uint8_t *target_row = &target_data[y * src_row_stride];
 
         for (int x = 0; x < src_width; ++x)
