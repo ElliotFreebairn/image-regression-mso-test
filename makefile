@@ -20,7 +20,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 check: $(TARGET)
 	rm -f converted/import/doc/* converted/export/doc/*
 
-	mkdir -p ./converted/import/doc ./converted/export/doc \
+	mkdir -p ./converted/import/doc ./converted/export/doc
 
 	./$(TARGET) fdo69695-1.doc \
 		converted/input/authoritative-page-0.bmp \
